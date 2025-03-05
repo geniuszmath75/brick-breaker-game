@@ -1,3 +1,5 @@
+package model;
+
 public class GameModel {
     // Stores the current game state (running or not)
     private boolean isGameRunning = false;
