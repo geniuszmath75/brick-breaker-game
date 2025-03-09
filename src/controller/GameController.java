@@ -23,7 +23,11 @@ public class GameController {
         view.getDifficultyPanel().addEasyListener(new EasyButtonListener());
         view.getDifficultyPanel().addMediumListener(new MediumButtonListener());
         view.getDifficultyPanel().addHardListener(new HardButtonListener());
-        view.getDifficultyPanel().addBackListener(new BackButtonListener());
+        view.getDifficultyPanel().addBackListener(new BackButtonListener("Menu"));
+
+        // Add button listeners from the level panel
+        view.getLevelPanel().addLevelListener(new LevelButtonListener());
+        view.getLevelPanel().addBackListener(new BackButtonListener("Difficulty"));
     }
 
     // Handles the START button click
@@ -44,7 +48,7 @@ public class GameController {
     // Handles the EASY button click
     class EasyButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("EASY mode selected");
+            view.setMainPanel("Level"); // Switch view to levels panel
         }
     }
 
@@ -62,10 +66,24 @@ public class GameController {
         }
     }
 
-    // Handles the BACK button click
-    class BackButtonListener implements ActionListener {
+    // Handles the game level selection button click
+    class LevelButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            view.setMainPanel("Menu"); // Returns to menu panel
+            System.out.println("Level 1 selected");
+        }
+    }
+
+    // Handles the BACK button click with a target panel name
+    class BackButtonListener implements ActionListener {
+        private final String panelName;
+
+        // BACK button listener constructor
+        public BackButtonListener(String panelName) {
+            this.panelName = panelName;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            view.setMainPanel(panelName); // Returns to menu panel
         }
     }
 }

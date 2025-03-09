@@ -8,6 +8,7 @@ public class GameView extends JFrame {
     private final CardLayout cardLayout = new CardLayout(); // Layout that allow to switch game views
     private final JPanel mainPanel = new JPanel(cardLayout); // Main (currently visible) panel
     private final DifficultyPanel difficultyPanel;
+    private final LevelSelectPanel levelPanel;
 
     // Creates and configures the main game window
     public GameView() {
@@ -23,6 +24,10 @@ public class GameView extends JFrame {
         // Initialize difficulty panel
         difficultyPanel = new DifficultyPanel();
         mainPanel.add(difficultyPanel, "Difficulty");
+
+        // Initialize levels panel
+        levelPanel = new LevelSelectPanel();
+        mainPanel.add(levelPanel, "Level");
 
         // Add mainPanel to JFrame
         add(mainPanel);
@@ -41,6 +46,9 @@ public class GameView extends JFrame {
 
     // Returns the difficulty panel
     public DifficultyPanel getDifficultyPanel() { return difficultyPanel; }
+
+    // Returns the levels panel
+    public LevelSelectPanel getLevelPanel() { return levelPanel; }
 
     // Set the main panel
     public void setMainPanel(String panelName) {
