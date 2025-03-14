@@ -5,6 +5,8 @@ import view.GameView;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class GameController {
     private final GameModel model;  // Stores game state
@@ -28,12 +30,15 @@ public class GameController {
         // Add button listeners from the level panel
         view.getLevelPanel().addLevelListener(new LevelButtonListener());
         view.getLevelPanel().addBackListener(new BackButtonListener("Difficulty"));
+
+        // Add key listeners from the main game panel
+        view.getGamePanel().addKeyListener(new KeyHandler());
+        view.getGamePanel().setFocusable(true);
     }
 
     // Handles the START button click
     class StartListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            model.startGame();
             view.setMainPanel("Difficulty"); // Switch view to difficulty panel
         }
     }
@@ -59,7 +64,7 @@ public class GameController {
         }
     }
 
-    // Handles the EASY button click
+    // Handles the HARD button click
     class HardButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             System.out.println("HARD mode selected");
@@ -69,7 +74,8 @@ public class GameController {
     // Handles the game level selection button click
     class LevelButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Level 1 selected");
+            view.setMainPanel("Game");
+            model.startGame();
         }
     }
 
@@ -84,6 +90,15 @@ public class GameController {
 
         public void actionPerformed(ActionEvent e) {
             view.setMainPanel(panelName); // Returns to menu panel
+        }
+    }
+
+    // Handles keyboard events
+    private class KeyHandler extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            model.getPaddle().keyPressed(e); // Pass event to Paddle model
+            view.getGamePanel().repaint(); // Refresh view after press key
         }
     }
 }
