@@ -1,15 +1,15 @@
 package model;
 
-import java.awt.*;
-
 public class GameModel {
     // Stores the current game state (running or not)
     private boolean isGameRunning = false;
     private final Paddle paddle; // store Paddle data
+    private final Ball ball; // store Ball data
 
     // Init all game models
     public GameModel() {
-        paddle = new Paddle(350, 500, 100, 10, 10, Color.BLACK); // Init paddle instance
+        paddle = new Paddle(315, 515, 155, 15, 15); // Init paddle instance
+        ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, paddle); // Init ball instance
     }
 
     // Checks if the game is currently running
@@ -31,6 +31,15 @@ public class GameModel {
     public void movePaddleRight() {
         paddle.moveRight();
     }
+
+    // Returns Ball instance
+    public Ball getBall() { return ball; }
+
+    // Start ball
+    public void startBall() { ball.start(); }
+
+    // Move ball
+    public void moveBall() { ball.move(); }
 
     // Starts the game
     public void startGame() {

@@ -19,6 +19,7 @@ public class GameView extends JFrame {
         setSize(800, 600); // Set window size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close app on exit
         setLocationRelativeTo(null); // Center the window on screen
+        setResizable(false); // Disable window resizing
 
         // Initialize menu panel
         menuPanel = new MenuPanel();
@@ -68,5 +69,4 @@ public class GameView extends JFrame {
             gamePanel.requestFocusInWindow();
         }
     }
-
 }

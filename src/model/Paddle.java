@@ -1,24 +1,21 @@
 package model;
 
-import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class Paddle {
     private int x; // Coordinate X
-    private int y; // Coordinate Y
-    private int width; // Paddle width
-    private int height; // Paddle height
-    private int speed; // Paddle movement speed
-    private Color color; // Paddle color
+    private final int y; // Coordinate Y
+    private final int width; // Paddle width
+    private final int height; // Paddle height
+    private final int speed; // Paddle movement speed
 
     // Paddle constructor
-    public Paddle(int x, int y, int width, int height, int speed, Color color) {
+    public Paddle(int x, int y, int width, int height, int speed) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.speed = speed;
-        this.color = color;
     }
 
     // Get coordinate X value
@@ -46,19 +43,14 @@ public class Paddle {
         return speed;
     }
 
-    // Get color of the paddle
-    public Color getColor() {
-        return color;
-    }
-
     // Move paddle to left (decrease coordinate X by speed value)
     public void moveLeft() {
-        x -= speed;
+        if (x - speed >= 0) { x -= speed; } // moving paddle if it doesn't exceed the left window border
     }
 
     // Move paddle to right (increase coordinate X by speed value)
     public void moveRight() {
-        x += speed;
+        if (x + width + speed < 800) { x += speed; } // moving paddle if it doesn't exceed the right window border
     }
 
     // Handle paddle movement

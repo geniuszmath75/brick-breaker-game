@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.Timer;
 
 public class GameController {
     private final GameModel model;  // Stores game state
@@ -16,6 +17,14 @@ public class GameController {
     public GameController(GameModel model, GameView view) {
         this.model = model;
         this.view = view;
+
+        Timer timer = new Timer(10, _ -> { // Timer to update game state every 10ms - for ball movement
+            if (model.isGameRunning()) {
+                model.moveBall();
+                view.getGamePanel().repaint();
+            }
+        });
+        timer.start();
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
@@ -98,6 +107,7 @@ public class GameController {
         @Override
         public void keyPressed(KeyEvent e) {
             model.getPaddle().keyPressed(e); // Pass event to Paddle model
+            model.getBall().keyPressed(e); // Pass event to Ball model
             view.getGamePanel().repaint(); // Refresh view after press key
         }
     }
