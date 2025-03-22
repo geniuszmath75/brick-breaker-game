@@ -3,11 +3,13 @@ package controller;
 import model.GameModel;
 import view.GameView;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.DisplayMode;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.Timer;
 
 public class GameController {
     private final GameModel model;  // Stores game state
@@ -18,13 +20,25 @@ public class GameController {
         this.model = model;
         this.view = view;
 
-        Timer timer = new Timer(10, _ -> { // Timer to update game state every 10ms - for ball movement
-            if (model.isGameRunning()) {
-                model.moveBall();
-                view.getGamePanel().repaint();
+        // Get the screen refresh rate
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int refreshRate = gd.getDisplayMode().getRefreshRate();
+        if (refreshRate == DisplayMode.REFRESH_RATE_UNKNOWN) {
+            refreshRate = 60; // Default to 60 FPS if refresh rate is unknown
+        }
+        int sleepTime = 1000 / refreshRate; // Calculate sleep time based on refresh rate (in milliseconds)
+
+        new Thread(() -> { // create a new thread to refresh move of the ball smoothly
+            while (true) {
+                model.getBall().move();
+                view.repaint();
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        });
-        timer.start();
+        }).start();
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
@@ -108,7 +122,6 @@ public class GameController {
         public void keyPressed(KeyEvent e) {
             model.getPaddle().keyPressed(e); // Pass event to Paddle model
             model.getBall().keyPressed(e); // Pass event to Ball model
-            view.getGamePanel().repaint(); // Refresh view after press key
         }
     }
 }

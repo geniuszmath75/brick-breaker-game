@@ -9,7 +9,7 @@ public class GameModel {
     // Init all game models
     public GameModel() {
         paddle = new Paddle(315, 515, 155, 15, 15); // Init paddle instance
-        ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, paddle); // Init ball instance
+        ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, paddle, this); // Init ball instance
     }
 
     // Checks if the game is currently running
@@ -47,7 +47,5 @@ public class GameModel {
     }
 
     // Stops the game
-    public void stopGame() {
-        isGameRunning = false;
-    }
+    public void stopGame() { isGameRunning = false; }
 }

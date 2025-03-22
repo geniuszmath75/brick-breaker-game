@@ -3,7 +3,7 @@ import model.GameModel;
 import view.GameView;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         // Initialize game model (stores game state)
         GameModel model = new GameModel();
         // Initialize game view (UI components)

@@ -8,15 +8,18 @@ public class Ball {
     private final int diameter = 25; // Diameter of the ball
     private int xSpeed = 0; // Ball movement speed on X axis
     private int ySpeed = 0; // Ball movement speed on Y axis
-    private final int speed = 5; // General ball movement speed value
+    private final int speed = 3; // General ball movement speed value
     private final Paddle paddle; // Paddle reference
+    private final GameModel model; // GameModel reference
     private boolean stuck = true; // Ball is stuck to the paddle - position on start
+    private int lives = 3; // Number of lives
 
     // Ball constructor
-    public Ball(int xStart, int yStart, Paddle paddle) {
+    public Ball(int xStart, int yStart, Paddle paddle, GameModel model) {
         this.x = xStart;
         this.y = yStart;
         this.paddle = paddle;
+        this.model = model;
     }
 
     // Get coordinate X value
@@ -40,6 +43,9 @@ public class Ball {
     // Get ball stuck status
     public boolean isStuck() { return stuck; }
 
+    // Get number of lives
+    public int getLives() { return lives; }
+
     // Set ball movement speed and direction on X & Y axis
     public void move() {
         if (stuck) { // Ball is stuck to the paddle
@@ -52,7 +58,7 @@ public class Ball {
             y += ySpeed;
 
             // Reflection from left and right walls
-            if (x <= 0 || x + diameter > 785) {
+            if (x <= 0 || x + (2 * diameter) > 800) {
                 xSpeed = -xSpeed;
             }
 
@@ -77,8 +83,14 @@ public class Ball {
         }
     }
 
-    public void reset() { // Reset ball position after it's out of the down border
-        stuck = true;
+    // Reset ball position after it's out of the down border
+    public void reset() {
+        if (--lives <= 0) { // decrease lives
+            model.stopGame(); // if 0 lives - game over
+            return;
+        }
+
+        stuck = true; // reset ball position
         xSpeed = 0;
         ySpeed = 0;
         x = paddle.getX() + (paddle.getWidth() / 2) - (diameter / 2);
