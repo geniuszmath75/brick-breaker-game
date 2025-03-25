@@ -3,6 +3,7 @@ package view;
 import model.Ball;
 import model.GameModel;
 import model.Paddle;
+import model.Brick;
 import utils.FontLoader;
 
 import javax.swing.*;
@@ -18,8 +19,10 @@ public class GamePanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+
         // Call parent paint method
-        super.paintComponent(g);
+        super.paintComponent(g2);
 
         // Get Paddle model
         Paddle paddle = model.getPaddle();
@@ -27,37 +30,54 @@ public class GamePanel extends JPanel {
         // Get Ball model
         Ball ball = model.getBall();
 
+        // Drawing bricks
+        Brick brick = model.getBrick();
+
         // Drawing paddle
-        g.setColor(Color.WHITE); // Set white paddle color
-        g.fillRoundRect(paddle.getX(), paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
+        g2.setColor(Color.WHITE); // Set white paddle color
+        g2.fillRoundRect(paddle.getX(), paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
 
         // Drawing ball
-        g.setColor(Color.WHITE);
-        g.fillOval(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter());
+        g2.setColor(Color.WHITE);
+        g2.fillOval(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter());
+
+        // Drawing bricks
+        brick.draw(g2);
 
         // Drawing start information text
-        if (ball.isStuck()) {
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString("HIT SPACE TO START", 280, 50);
+        if (ball.isStuck() && model.isGameRunning()) {
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 30));
+            g2.drawString("HIT SPACE TO START", 235, 300);
+            g2.drawString("USE ARROW KEYS TO MOVE", 180, 350);
         }
 
         // Drawing lives
         for (int i = 0; i < 3; i++) {
             if (i < ball.getLives()) { // Draw white circles for remaining lives
-                g.setColor(Color.WHITE);
+                g2.setColor(Color.WHITE);
             } else {
-                g.setColor(Color.RED); // Draw red circles for lost lives
+                g2.setColor(Color.RED); // Draw red circles for lost lives
             }
-            g.fillOval(10 + (i * 30), 10, 20, 20);
-            g.setColor(Color.BLACK);
-            g.drawOval(10 + (i * 30), 10, 20, 20);
+            g2.fillOval(12 + (i * 40), 12, 30, 30);
+            g2.setColor(Color.BLACK);
+            g2.drawOval(12 + (i * 40), 12, 30, 30);
         }
+
+        // Drawing score
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 30));
+        g2.drawString("SCORE: " + brick.getScore(), 310, 40);
 
         // Drawing game over text
         if (!model.isGameRunning()) {
-            g.setColor(Color.WHITE);
-            g.setFont(FontLoader.loadFont("fonts/DominoBrick-aYy39.ttf", 52));
-            g.drawString("GAME OVER", 260, 200);
+            g2.setColor(Color.WHITE);
+            g2.setFont(FontLoader.loadFont("fonts/DominoBrick-aYy39.ttf", 52));
+            g2.drawString("GAME OVER", 260, 350);
+
+            ball.setLives(0); // Set lives to 0 to prevent further drawing
+            g2.setColor(Color.BLACK);
+            g2.fillOval(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter());
         }
     }
 }

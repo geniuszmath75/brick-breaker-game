@@ -3,9 +3,6 @@ package controller;
 import model.GameModel;
 import view.GameView;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.DisplayMode;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -19,26 +16,20 @@ public class GameController {
     public GameController(GameModel model, GameView view) {
         this.model = model;
         this.view = view;
-
-        // Get the screen refresh rate
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        int refreshRate = gd.getDisplayMode().getRefreshRate();
-        if (refreshRate == DisplayMode.REFRESH_RATE_UNKNOWN) {
-            refreshRate = 60; // Default to 60 FPS if refresh rate is unknown
-        }
-        int sleepTime = 1000 / refreshRate; // Calculate sleep time based on refresh rate (in milliseconds)
+        int refreshRate = model.getRefreshRate();
 
         new Thread(() -> { // create a new thread to refresh move of the ball smoothly
             while (true) {
                 model.getBall().move();
+                model.getBall().checkCollision();
                 view.repaint();
                 try {
-                    Thread.sleep(sleepTime);
+                    Thread.sleep(1000 / refreshRate); // sleep based on refresh rate (in milliseconds)
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        }).start(); // TODO: try to find a better way to refresh the game loop - without warnings
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
@@ -81,14 +72,14 @@ public class GameController {
     }
 
     // Handles the MEDIUM button click
-    class MediumButtonListener implements ActionListener {
+    static class MediumButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             System.out.println("MEDIUM mode selected");
         }
     }
 
     // Handles the HARD button click
-    class HardButtonListener implements ActionListener {
+    static class HardButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             System.out.println("HARD mode selected");
         }
