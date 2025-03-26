@@ -48,6 +48,7 @@ public class Paddle {
         if (x + width + speed < 800) { x += speed; } // moving paddle if it doesn't exceed the right window border
     }
 
+    // TODO: try to find better way to handle paddle movement (for better fluency and responsiveness)
     // Handle paddle movement
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {

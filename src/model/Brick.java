@@ -8,9 +8,8 @@ public class Brick {
     private final int brickWidth; // Every brick width
     private final int brickHeight; // Every brick height
     private final GameModel model; // GameModel reference
-    private int totalBricks; // Total number of remaining bricks
-    private int score = 0; // Player score
     private Color[][] brickColors; // Table to store brick colors
+    private int totalBricks; // Total number of remaining bricks
 
     // Brick constructor
     public Brick(int row, int col, GameModel model) {
@@ -47,22 +46,6 @@ public class Brick {
         }
     }
 
-    // Drawing function for all bricks
-    public void draw(Graphics2D g) {
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                if (map[i][j] > 0) {
-                    g.setColor(brickColors[i][j]);
-                    g.fillRoundRect(j * brickWidth, i * brickHeight + 70, brickWidth, brickHeight, 25, 25); // Draw brick
-
-                    g.setStroke(new BasicStroke(3)); // Set brick border width
-                    g.setColor(Color.BLACK);
-                    g.drawRoundRect(j * brickWidth, i * brickHeight + 70, brickWidth, brickHeight, 25, 25); // Draw brick border
-                }
-            }
-        }
-    }
-
     // Get brick map
     public int[][] getMap() { return map; }
 
@@ -72,18 +55,11 @@ public class Brick {
     // Get brick height
     public int getBrickHeight() { return brickHeight; }
 
-    // Get player score
-    public int getScore() { return score; }
-
-    // Increase player score
-    public void increaseScore() { score += 5; }
+    // Get tab of brick colors
+    public Color[][] getBrickColors() { return brickColors; }
 
     // Decrease total number of bricks
-    public void decreaseTotalBricks() {
-        if (--totalBricks <= 0) {
-            model.stopGame();
-        }
-    }
+    public void decreaseTotalBricks() { if (--totalBricks <= 0) { model.renewGame(); } }
 
     // Setting specific brick value
     public void setBrickValue(int value, int row, int col) { map[row][col] = value; }

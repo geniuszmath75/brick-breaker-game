@@ -18,7 +18,9 @@ public class GameController {
         this.view = view;
         int refreshRate = model.getRefreshRate();
 
-        new Thread(() -> { // create a new thread to refresh move of the ball smoothly
+        // TODO: try to find a better way to refresh the game loop - without warnings
+        // create a new thread to refresh move of the ball smoothly
+        new Thread(() -> {
             while (true) {
                 model.getBall().move();
                 model.getBall().checkCollision();
@@ -29,7 +31,7 @@ public class GameController {
                     e.printStackTrace();
                 }
             }
-        }).start(); // TODO: try to find a better way to refresh the game loop - without warnings
+        }).start();
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
