@@ -113,9 +113,9 @@ public class GameController {
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // If ESC is pressed - pause the game
-                gamePaused = true; // Stop the game loop flag
-                model.getPaddle().stopMoving(); // Stop the paddle
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // If Esc - pause the game
+                gamePaused = true; // stop the game loop flag
+                model.getPaddle().stopMoving(); // stop the paddle
 
                 // Show the pause dialog
                 int option = JOptionPane.showOptionDialog(
@@ -129,21 +129,18 @@ public class GameController {
                         "CONTINUE"
                 );
 
-                // If user chooses to continue
-                if (option == JOptionPane.YES_OPTION) { gamePaused = false; }
-
+                // If user chooses to go back to the menu
                 if (option == JOptionPane.NO_OPTION) {
-                    // If user chooses to go back to the menu
                     GameView parentView = (GameView) SwingUtilities.getWindowAncestor(view.getGamePanel());
                     parentView.returnToMenu(); // return to the menu and restart the game
                     model.renewGame();
                     model.setScore(0);
                     model.setLives(3);
-                    gamePaused = false;
                 }
-            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) { // Pass the event to the Ball model
+                gamePaused = false; // Continue the game animation refresh
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) { // If Space - pass the event to the Ball model
                 model.getBall().keyPressed(e);
-            } else { // Pass the event to the Paddle model
+            } else { // Else pass the event to the Paddle model
                 model.getPaddle().setMoving(e.getKeyCode(), true);
             }
         }

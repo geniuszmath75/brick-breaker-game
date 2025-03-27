@@ -12,7 +12,7 @@ public class Paddle {
     private boolean movingRight = false; // Paddle moving right flag
 
     // Paddle constructor
-    public Paddle(int x, int y, int width, int height, int speed, GameModel model) {
+    public Paddle(int x, int y, int width, int height, int speed) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -25,7 +25,7 @@ public class Paddle {
                 if (movingLeft) { moveLeft(); }
                 if (movingRight) { moveRight(); }
                 try {
-                    Thread.sleep(1000 / model.getRefreshRate() * 2); // sleep based on refresh rate (in milliseconds) * 2
+                    Thread.sleep(10);
                 } catch (InterruptedException ignored) {}
             }
         }).start();

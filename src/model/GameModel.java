@@ -22,7 +22,7 @@ public class GameModel {
             refreshRate = 60; // Default to 60 FPS if refresh rate is unknown
         }
 
-        paddle = new Paddle(320, 715, 140, 15, 5, this); // Init paddle instance
+        paddle = new Paddle(320, 715, 140, 15, 5); // Init paddle instance
         brick = new Brick(4, 8, this); // Init brick instance
         ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, 25, this, paddle, brick); // Init ball instance
     }
@@ -57,7 +57,7 @@ public class GameModel {
         ball.reset();
         brick = new Brick(4, 8, this);
         ball.updateBrickReference(brick);
-        paddle = new Paddle(320, 715, 140, 15, 5, this);
+        paddle = new Paddle(320, 715, 140, 15, 5);
         ball.updatePaddleReference(paddle);
         startGame();
     }
