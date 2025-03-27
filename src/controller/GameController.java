@@ -3,6 +3,7 @@ package controller;
 import model.GameModel;
 import view.GameView;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -11,6 +12,7 @@ import java.awt.event.KeyEvent;
 public class GameController {
     private final GameModel model;  // Stores game state
     private final GameView view;    // Manages game UI
+    private boolean gamePaused = false; // Stores game state (paused or not)
 
     // Initializes the game controller
     public GameController(GameModel model, GameView view) {
@@ -18,18 +20,16 @@ public class GameController {
         this.view = view;
         int refreshRate = model.getRefreshRate();
 
-        // TODO: try to find a better way to refresh the game loop - without warnings
+        // TODO: try to find a better way to refresh game animations - without warnings
         // create a new thread to refresh move of the ball smoothly
         new Thread(() -> {
             while (true) {
-                model.getBall().move();
+                if (!gamePaused) { model.getBall().move(); } // Move the ball if the game is not paused
                 model.getBall().checkCollision();
                 view.repaint();
                 try {
                     Thread.sleep(1000 / refreshRate); // sleep based on refresh rate (in milliseconds)
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                } catch (InterruptedException ignored) {}
             }
         }).start();
 
@@ -113,8 +113,44 @@ public class GameController {
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            model.getPaddle().keyPressed(e); // Pass event to Paddle model
-            model.getBall().keyPressed(e); // Pass event to Ball model
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // If ESC is pressed - pause the game
+                gamePaused = true; // Stop the game loop flag
+                model.getPaddle().stopMoving(); // Stop the paddle
+
+                // Show the pause dialog
+                int option = JOptionPane.showOptionDialog(
+                        view.getGamePanel(),
+                        "Do you want to continue or go back to the menu?",
+                        "PAUSE",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        new String[]{"CONTINUE", "MENU"},
+                        "CONTINUE"
+                );
+
+                // If user chooses to continue
+                if (option == JOptionPane.YES_OPTION) { gamePaused = false; }
+
+                if (option == JOptionPane.NO_OPTION) {
+                    // If user chooses to go back to the menu
+                    GameView parentView = (GameView) SwingUtilities.getWindowAncestor(view.getGamePanel());
+                    parentView.returnToMenu(); // return to the menu and restart the game
+                    model.renewGame();
+                    model.setScore(0);
+                    model.setLives(3);
+                    gamePaused = false;
+                }
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) { // Pass the event to the Ball model
+                model.getBall().keyPressed(e);
+            } else { // Pass the event to the Paddle model
+                model.getPaddle().setMoving(e.getKeyCode(), true);
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            model.getPaddle().setMoving(e.getKeyCode(), false); // Pass the event to the Paddle model
         }
     }
 }

@@ -6,7 +6,7 @@ import java.awt.DisplayMode;
 
 public class GameModel {
     private boolean isGameRunning = false; // Stores the current game state (running or not)
-    private final Paddle paddle; // store Paddle data
+    private Paddle paddle; // store Paddle data
     private final Ball ball; // store Ball data
     private Brick brick; // store Brick data
     private int refreshRate; // Calculate sleep time based on refresh rate (in milliseconds)
@@ -22,7 +22,7 @@ public class GameModel {
             refreshRate = 60; // Default to 60 FPS if refresh rate is unknown
         }
 
-        paddle = new Paddle(320, 715, 140, 15, 20); // Init paddle instance
+        paddle = new Paddle(320, 715, 140, 15, 5, this); // Init paddle instance
         brick = new Brick(4, 8, this); // Init brick instance
         ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, 25, this, paddle, brick); // Init ball instance
     }
@@ -57,6 +57,8 @@ public class GameModel {
         ball.reset();
         brick = new Brick(4, 8, this);
         ball.updateBrickReference(brick);
+        paddle = new Paddle(320, 715, 140, 15, 5, this);
+        ball.updatePaddleReference(paddle);
         startGame();
     }
 

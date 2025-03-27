@@ -10,11 +10,13 @@ import java.awt.*;
 
 public class GamePanel extends JPanel {
     private final GameModel model; // Model reference
-    private boolean gameOverDisplayed = false;
+    private boolean gameOverDisplayed = false; // Game over message displayed flag
+    private final int startLives; // Initial number of lives
 
     // GamePanel constructor
     public GamePanel(GameModel model) {
         this.model = model;
+        this.startLives = model.getLives();
         setBackground(Color.BLACK); // set black background color
     }
 
@@ -79,7 +81,7 @@ public class GamePanel extends JPanel {
         }
 
         // Drawing lives
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < startLives; i++) {
             if (i < model.getLives()) { // red hearts for remaining lives
                 g.setColor(Color.RED);
             } else {
@@ -96,13 +98,7 @@ public class GamePanel extends JPanel {
         // Drawing game over text
         if (!model.isGameRunning()) {
             model.setLives(0); // Set lives to 0 to prevent further drawing and hide ball
-            g.setColor(Color.BLACK);
-            g.fillOval(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter());
-
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setStroke(new BasicStroke(3));
-            g2.setColor(Color.BLACK);
-            g2.drawOval(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter()); // Draw brick border
+            paddle.stopMoving();
 
             if (!gameOverDisplayed) {
                 gameOverDisplayed = true;
@@ -118,14 +114,16 @@ public class GamePanel extends JPanel {
                         "RESTART"
                 );
 
-                if (option == JOptionPane.YES_OPTION) { // Restart the game, score and lives
-                    model.renewGame();
-                    model.setScore(0);
-                    model.setLives(3);
-                } else {
+                // If user chooses to go back to the menu
+                if (option != JOptionPane.YES_OPTION) {
                     GameView parentView = (GameView) SwingUtilities.getWindowAncestor(this); // Get parent view
                     parentView.returnToMenu(); // Return to the menu
                 }
+
+                // Restart the game, score and lives
+                model.renewGame();
+                model.setScore(0);
+                model.setLives(3);
                 gameOverDisplayed = false;
             }
         }

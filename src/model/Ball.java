@@ -11,7 +11,7 @@ public class Ball {
     private int ySpeed = 0; // Ball movement speed on Y axis
     private int speed; // General ball movement speed value
     private final GameModel model; // GameModel reference
-    private final Paddle paddle; // Paddle reference
+    private Paddle paddle; // Paddle reference
     private Brick brick; // Brick reference
     private boolean stuck = true; // Ball is stuck to the paddle - position on start
 
@@ -69,22 +69,27 @@ public class Ball {
             }
 
             // Reflection from right wall
-            if(x + diameter >= 785) {
+            if (x + diameter >= 785) {
                 x = 785 - diameter;
                 xSpeed = -xSpeed;
             }
 
             // Reflection from the top wall
-            if (y <= 0) { ySpeed = -ySpeed; }
+            if (y <= 0) {
+                y = 0;
+                ySpeed = -ySpeed;
+            }
 
             // Reflection from the paddle
-            if (y + diameter >= paddle.getY() && x + diameter >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
-                ySpeed = -ySpeed;
+            if (y + diameter >= paddle.getY() && y + diameter - ySpeed < paddle.getY() &&
+                    x + diameter >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
+
+                y = paddle.getY() - diameter; // ensure that the ball does not "jump" the paddle
+                ySpeed = -Math.abs(ySpeed); // make sure the ball always bounces up
             }
         }
     }
 
-    // TODO: improve ball reflection from the bricks (sometimes ball destroys 3 bricks at once)
     // Handle ball collision with bricks
     public void checkCollision() {
         for (int i = 0; i < brick.getMap().length; i++) {
@@ -95,6 +100,7 @@ public class Ball {
                     int brickWidth = brick.getBrickWidth();
                     int brickHeight = brick.getBrickHeight();
 
+                    // Create new rectangles for ball and brick to check intersection
                     Rectangle brickRect = new Rectangle(brickX, brickY, brickWidth, brickHeight);
                     Rectangle ballRect = new Rectangle(x, y, diameter, diameter);
 
@@ -108,6 +114,7 @@ public class Ball {
                         } else {
                             ySpeed = -ySpeed; // reflection from the top or bottom side of the brick
                         }
+                        return; // exit the loop after the first brick collision (case of destroying multiple bricks at once)
                     }
                 }
             }
@@ -128,7 +135,6 @@ public class Ball {
         model.setLives(model.getLives() - 1);
         if (model.getLives() <= 0) { // decrease lives
             model.stopGame(); // if 0 lives - game over
-            return;
         }
 
         stuck = true; // reset ball position
@@ -138,8 +144,14 @@ public class Ball {
         y = paddle.getY() - diameter;
     }
 
+    // Update brick reference
     public void updateBrickReference(Brick brick) {
         this.brick = brick;
+    }
+
+    // Update paddle reference
+    public void updatePaddleReference(Paddle paddle) {
+        this.paddle = paddle;
     }
 
     // Handle ball starting

@@ -18,8 +18,6 @@ public class FontLoader {
             Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
             return font.deriveFont(size);
         } catch (IOException | FontFormatException e) {
-            // Catch other exceptions
-            e.printStackTrace();
             // Set default font
             return new Font("Arial", Font.BOLD, (int) size);
         }

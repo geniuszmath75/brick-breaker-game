@@ -69,7 +69,5 @@ public class GameView extends JFrame {
     }
 
     // Set menu panel as main panel
-    public void returnToMenu() {
-        setMainPanel("Menu");
-    }
+    public void returnToMenu() { setMainPanel("Menu"); }
 }
