@@ -3,8 +3,8 @@ package model;
 import java.awt.event.KeyEvent;
 
 public class Paddle {
-    private int x; // Coordinate X
-    private final int y; // Coordinate Y
+    private double x; // Coordinate X
+    private final double y; // Coordinate Y
     private final int width; // Paddle width
     private final int height; // Paddle height
     private final int speed; // Paddle movement speed
@@ -12,7 +12,7 @@ public class Paddle {
     private boolean movingRight = false; // Paddle moving right flag
 
     // Paddle constructor
-    public Paddle(int x, int y, int width, int height, int speed) {
+    public Paddle(double x, double y, int width, int height, int speed) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -32,12 +32,12 @@ public class Paddle {
     }
 
     // Get coordinate X value
-    public int getX() {
+    public double getX() {
         return x;
     }
 
     // Get coordinate Y value
-    public int getY() {
+    public double getY() {
         return y;
     }
 

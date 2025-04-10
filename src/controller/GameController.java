@@ -131,8 +131,9 @@ public class GameController {
 
                 // If user chooses to go back to the menu
                 if (option == JOptionPane.NO_OPTION) {
-                    GameView parentView = (GameView) SwingUtilities.getWindowAncestor(view.getGamePanel());
-                    parentView.returnToMenu(); // return to the menu and restart the game
+                    // GameView parentView = (GameView) SwingUtilities.getWindowAncestor(view.getGamePanel());
+                    // parentView.returnToMenu(); // return to the menu and restart the game
+                    view.setMainPanel("Menu");
                     model.renewGame();
                     model.setScore(0);
                     model.setLives(3);

@@ -10,12 +10,14 @@ import java.awt.*;
 
 public class GamePanel extends JPanel {
     private final GameModel model; // Model reference
+    private final GameView view; // View reference
     private boolean gameOverDisplayed = false; // Game over message displayed flag
     private final int startLives; // Initial number of lives
 
     // GamePanel constructor
-    public GamePanel(GameModel model) {
+    public GamePanel(GameModel model, GameView view) {
         this.model = model;
+        this.view = view;
         this.startLives = model.getLives();
         setBackground(Color.BLACK); // set black background color
     }
@@ -46,11 +48,11 @@ public class GamePanel extends JPanel {
 
         // Drawing paddle
         g.setColor(Color.WHITE); // Set white paddle color
-        g.fillRoundRect(paddle.getX(), paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
+        g.fillRoundRect((int)paddle.getX(), (int)paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
 
         // Drawing ball
         g.setColor(Color.WHITE);
-        g.fillOval(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter());
+        g.fillOval((int)ball.getX(), (int)ball.getY(), ball.getDiameter(), ball.getDiameter());
 
         // Drawing bricks
         int[][] map = brick.getMap();
@@ -116,8 +118,7 @@ public class GamePanel extends JPanel {
 
                 // If user chooses to go back to the menu
                 if (option != JOptionPane.YES_OPTION) {
-                    GameView parentView = (GameView) SwingUtilities.getWindowAncestor(this); // Get parent view
-                    parentView.returnToMenu(); // Return to the menu
+                    view.setMainPanel("Menu");
                 }
 
                 // Restart the game, score and lives

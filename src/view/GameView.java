@@ -34,7 +34,7 @@ public class GameView extends JFrame {
         mainPanel.add(levelPanel, "Level");
 
         // Initialize game panel
-        gamePanel = new GamePanel(model);
+        gamePanel = new GamePanel(model, this);
         mainPanel.add(gamePanel, "Game");
 
         // Add mainPanel to JFrame

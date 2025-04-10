@@ -4,11 +4,11 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class Ball {
-    private int x; // Coordinate X
-    private int y; // Coordinate Y
+    private double x; // Coordinate X
+    private double y; // Coordinate Y
     private final int diameter; // Diameter of the ball
-    private int xSpeed = 0; // Ball movement speed on X axis
-    private int ySpeed = 0; // Ball movement speed on Y axis
+    private double xSpeed = 0.0; // Ball movement speed on X axis
+    private double ySpeed = 0.0; // Ball movement speed on Y axis
     private int speed; // General ball movement speed value
     private final GameModel model; // GameModel reference
     private Paddle paddle; // Paddle reference
@@ -16,7 +16,7 @@ public class Ball {
     private boolean stuck = true; // Ball is stuck to the paddle - position on start
 
     // Ball constructor
-    public Ball(int xStart, int yStart, int diameter, GameModel model, Paddle paddle, Brick brick) {
+    public Ball(double xStart, double yStart, int diameter, GameModel model, Paddle paddle, Brick brick) {
         this.x = xStart;
         this.y = yStart;
         this.diameter = diameter;
@@ -37,10 +37,10 @@ public class Ball {
     }
 
     // Get coordinate X value
-    public int getX() { return x; }
+    public double getX() { return x; }
 
     // Get coordinate Y value
-    public int getY() { return y; }
+    public double getY() { return y; }
 
     // Get diameter value of the ball
     public int getDiameter() { return diameter; }
@@ -48,11 +48,10 @@ public class Ball {
     // Get ball stuck status
     public boolean isStuck() { return stuck; }
 
-    // TODO: improve ball reflection from the paddle (different bounce angle if paddle moves)
     // Set ball movement speed and direction on X & Y axis
     public void move() {
         if (stuck) { // Ball is stuck to the paddle
-            x = paddle.getX() + (paddle.getWidth() / 2) - (diameter / 2);
+            x = paddle.getX() + (paddle.getWidth() / 2.0) - (diameter / 2.0);
             y = paddle.getY() - diameter;
         } else if (this.getY() >= paddle.getY() + paddle.getHeight()) { // Ball under the paddle
             reset();
@@ -64,7 +63,7 @@ public class Ball {
 
             // Reflection from left wall
             if (x <= 0) {
-                x = 0;
+                x = 0.0;
                 xSpeed = -xSpeed;
             }
 
@@ -76,7 +75,7 @@ public class Ball {
 
             // Reflection from the top wall
             if (y <= 0) {
-                y = 0;
+                y = 0.0;
                 ySpeed = -ySpeed;
             }
 
@@ -85,9 +84,32 @@ public class Ball {
                     x + diameter >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
 
                 y = paddle.getY() - diameter; // ensure that the ball does not "jump" the paddle
-                ySpeed = -Math.abs(ySpeed); // make sure the ball always bounces up
+
+                // Ball reflection angle
+                double bounceAngle = getBounceAngle();
+
+                // Total velocity
+                double totalSpeed = Math.sqrt(xSpeed * xSpeed + ySpeed * ySpeed);
+
+                // New velocity components
+                xSpeed = totalSpeed * Math.sin(bounceAngle);
+                ySpeed = -totalSpeed * Math.cos(bounceAngle);
             }
         }
+    }
+
+    // Calculate the angle of the ball reflection from the paddle
+    private double getBounceAngle() {
+        double paddleCenter = paddle.getX() + paddle.getWidth() / 2.0;
+        double ballCenter = x + diameter / 2.0;
+
+        // Calculate how much from the paddle center the ball has hit (-1.0 to 1.0)
+        double relativeIntersect = (ballCenter - paddleCenter) / (paddle.getWidth() / 2.0);
+
+        // Max angle of reflection: 75deg (in radians)
+        double maxBounceAngle = Math.toRadians(75);
+
+        return relativeIntersect * maxBounceAngle;
     }
 
     // Handle ball collision with bricks
@@ -102,7 +124,7 @@ public class Ball {
 
                     // Create new rectangles for ball and brick to check intersection
                     Rectangle brickRect = new Rectangle(brickX, brickY, brickWidth, brickHeight);
-                    Rectangle ballRect = new Rectangle(x, y, diameter, diameter);
+                    Rectangle ballRect = new Rectangle((int)x, (int)y, diameter, diameter);
 
                     // Check if ball intersects with brick
                     if (ballRect.intersects(brickRect)) {
@@ -140,7 +162,7 @@ public class Ball {
         stuck = true; // reset ball position
         xSpeed = 0;
         ySpeed = 0;
-        x = paddle.getX() + (paddle.getWidth() / 2) - (diameter / 2);
+        x = paddle.getX() + (paddle.getWidth() / 2.0) - (diameter / 2.0);
         y = paddle.getY() - diameter;
     }
 
