@@ -24,8 +24,8 @@ public class GamePanel extends JPanel {
 
     // Draw heart shape
     private void drawHeart(Graphics g, int x) {
-        int[] triangleX = { x + 30 / 2, x, x + 30};
-        int[] triangleY = { 42, 12 + 30 / 3, 12 + 30 / 3 };
+        int[] triangleX = {x + 30 / 2, x, x + 30};
+        int[] triangleY = {42, 12 + 30 / 3, 12 + 30 / 3};
 
         g.fillOval(x, 13, 30 / 2, 30 / 2); // left half of heart
         g.fillOval(x + 30 / 2, 13, 30 / 2, 30 / 2); // right half of heart
@@ -48,30 +48,21 @@ public class GamePanel extends JPanel {
 
         // Drawing paddle
         g.setColor(Color.WHITE); // Set white paddle color
-        g.fillRoundRect((int)paddle.getX(), (int)paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
+        g.fillRoundRect((int) paddle.getX(), (int) paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
 
         // Drawing ball
         g.setColor(Color.WHITE);
-        g.fillOval((int)ball.getX(), (int)ball.getY(), ball.getDiameter(), ball.getDiameter());
+        g.fillOval((int) ball.getX(), (int) ball.getY(), ball.getDiameter(), ball.getDiameter());
 
         // Drawing bricks
-        int[][] map = brick.getMap();
-        int brickWidth = brick.getBrickWidth();
-        int brickHeight = brick.getBrickHeight();
-        Color[][] brickColors = brick.getBrickColors();
+        if (brick.getDestructionLevel() > 0) {
+            g.setColor(brick.getBrickColor());
+            g.fillRoundRect((int) brick.getX(), (int) brick.getY(), brick.getBrickWidth(), brick.getBrickHeight(), 25, 25); // Draw brick
 
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                if (map[i][j] > 0) {
-                    g.setColor(brickColors[i][j]);
-                    g.fillRoundRect(j * brickWidth, i * brickHeight + 70, brickWidth, brickHeight, 25, 25); // Draw brick
-
-                    Graphics2D g2 = (Graphics2D) g;
-                    g2.setStroke(new BasicStroke(3)); // Set brick border width
-                    g2.setColor(Color.BLACK);
-                    g2.drawRoundRect(j * brickWidth, i * brickHeight + 70, brickWidth, brickHeight, 25, 25); // Draw brick border
-                }
-            }
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setStroke(new BasicStroke(3)); // Set brick border width
+            g2.setColor(Color.WHITE);
+            g2.drawRoundRect((int) brick.getX(), (int) brick.getY(), brick.getBrickWidth(), brick.getBrickHeight(), 25, 25); // Draw brick border
         }
 
         // Drawing start information text

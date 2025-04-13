@@ -67,7 +67,4 @@ public class GameView extends JFrame {
         // If view change to game panel, then set focus on this panel (to immediately handle keyboard events)
         if(panelName.equals("Game")) { gamePanel.requestFocusInWindow(); }
     }
-
-    // Set menu panel as main panel
-    public void returnToMenu() { setMainPanel("Menu"); }
 }

@@ -4,63 +4,65 @@ import java.awt.*;
 import java.util.Random;
 
 public class Brick {
-    private final int[][] map; // 2D array to store brick map
-    private final int brickWidth; // Every brick width
-    private final int brickHeight; // Every brick height
-    private final GameModel model; // GameModel reference
-    private Color[][] brickColors; // Table to store brick colors
-    private int totalBricks; // Total number of remaining bricks
+    private final double x; // Coordinate X
+    private final double y; // Coordinate Y
+    private final int brickWidth; // Brick width
+    private final int brickHeight; // Brick height
+    protected final GameModel model; // GameModel reference
+    private final Color brickColor; // Brick color
+    private int destructionLevel; // Level of brick destruction
 
     // Brick constructor
-    public Brick(int row, int col, GameModel model) {
-        this.model = model;
-        totalBricks = row * col; // Calculate total number of bricks
-        map = new int[row][col]; // Init brick map
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                map[i][j] = 1;
-            }
-        }
-        brickWidth = 785/col; // width per brick
-        brickHeight = 160/row; // height per brick
-        initColors();
+    public Brick(double x, double y, int width, int height, int destruction, GameModel modelInstance) {
+        this.model = modelInstance;
+        this.x = x;
+        this.y = y;
+        this.brickWidth = width;
+        this.brickHeight = height;
+        this.destructionLevel = destruction;
+        this.brickColor = initColor();
     }
 
-    // Initialize brick colors (random for each brick)
-    public void initColors() {
+    // Initialize brick random color
+    public Color initColor() {
         Random rand = new Random();
-        brickColors = new Color[map.length][map[0].length]; // Init brick colors table
 
-        // Set random color for each brick
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                if (map[i][j] > 0) {
-                    Color randomColor;
-                    do {
-                        randomColor = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-                    } while (randomColor.equals(Color.BLACK)); // avoid black color
-
-                    brickColors[i][j] = randomColor;
-                }
-            }
-        }
+        // Set random color for brick
+        Color randomColor;
+        randomColor = new Color(rand.nextInt(1, 256), rand.nextInt(1, 256), rand.nextInt(1, 256));
+        return randomColor;
     }
 
-    // Get brick map
-    public int[][] getMap() { return map; }
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 
     // Get brick width
-    public int getBrickWidth() { return brickWidth; }
+    public int getBrickWidth() {
+        return brickWidth;
+    }
 
     // Get brick height
-    public int getBrickHeight() { return brickHeight; }
+    public int getBrickHeight() {
+        return brickHeight;
+    }
 
-    // Get tab of brick colors
-    public Color[][] getBrickColors() { return brickColors; }
+    // Handle ball hit
+    public void hit() {
+        destructionLevel--;
+    }
 
-    // Decrease total number of bricks
-    public void decreaseTotalBricks() { if (--totalBricks <= 0) { model.renewGame(); } }
+    // Get brick color
+    public Color getBrickColor() {
+        return brickColor;
+    }
 
-    // Setting specific brick value
-    public void setBrickValue(int value, int row, int col) { map[row][col] = value; }
+    // Get destruction level
+    public int getDestructionLevel() {
+        return destructionLevel;
+    }
 }

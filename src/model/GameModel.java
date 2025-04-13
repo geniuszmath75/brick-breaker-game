@@ -12,6 +12,8 @@ public class GameModel {
     private int refreshRate; // Calculate sleep time based on refresh rate (in milliseconds)
     private int score = 0; // Player score
     private int lives = 3; // Number of lives
+    // TODO: Temporary value, must be move to the MapGenerator class
+    private int totalBricks = 1; // Total number of bricks
 
     // Init all game models
     public GameModel() {
@@ -23,12 +25,15 @@ public class GameModel {
         }
 
         paddle = new Paddle(320, 715, 140, 15, 5); // Init paddle instance
-        brick = new Brick(4, 8, this); // Init brick instance
+        brick = new Brick(90, 100, 200, 70, 1,this); // Init brick instance
         ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, 25, this, paddle, brick); // Init ball instance
     }
 
-    // Returns sleep tim
+    // Returns sleep time
     public int getRefreshRate() { return refreshRate; }
+
+    // Set sleep time
+    public void setRefreshRate(int refreshRate) { this.refreshRate = refreshRate; }
 
     // Checks if the game is currently running
     public boolean isGameRunning() {
@@ -53,12 +58,26 @@ public class GameModel {
 
     // Renew the game
     public void renewGame() {
-        setLives(3);
+        int prevLives = getLives();
+
+        // Reset ball position
         ball.reset();
-        brick = new Brick(4, 8, this);
+
+        // Reset brick position
+        brick = new Brick(90, 100, 200, 70, 1, this);
         ball.updateBrickReference(brick);
+
+        // Reset paddle position
         paddle = new Paddle(320, 715, 140, 15, 5);
         ball.updatePaddleReference(paddle);
+
+        // Reset previous number of lives
+        setLives(prevLives);
+
+        // TODO: Temporary solution until create completeLevel title
+        // Reset total bricks, score and game
+        setTotalBricks(1);
+        setScore(0);
         startGame();
     }
 
@@ -79,4 +98,19 @@ public class GameModel {
 
     // Increase player score
     public void increaseScore() { score += 5; }
+
+    // Set total number of bricks
+    public void setTotalBricks(int totalBricks) { this.totalBricks = totalBricks; }
+
+    // Check if level is completed (all bricks are destroyed)
+    public void checkLevelComplete() {
+        // Decrease number of destroyed bricks
+        totalBricks--;
+
+        // Check if all bricks have destroyed
+        if(totalBricks == 0) {
+            System.out.println("Level Complete");
+            renewGame();
+        }
+    }
 }
