@@ -12,7 +12,6 @@ public class GameModel {
     private Ball ball; // store Ball data
     private List<Brick> bricks; // store Brick data
     private Paddle paddle; // store Paddle data
-    private MapGenerator mapGenerator; // store map level data
 
     /**
      * GAME PARAMETERS
@@ -23,6 +22,8 @@ public class GameModel {
     private int score = 0; // Player score
     private int lives = 3; // Number of lives
     private int totalBricks; // Total number of bricks
+    private int LEVEL = 1; // Selected game level
+    private String DIFFICULTY = "EASY"; // Selected game difficulty
 
     /**
      * OTHER
@@ -38,13 +39,6 @@ public class GameModel {
         if (refreshRate == DisplayMode.REFRESH_RATE_UNKNOWN) {
             refreshRate = 60; // Default to 60 FPS if refresh rate is unknown
         }
-
-        // Generate map elements(Ball, Paddle, List<Brick>) depends on level and difficulty
-        this.mapGenerator = new MapGenerator(1, "EASY", this);
-        this.ball = mapGenerator.getBall();
-        this.bricks = mapGenerator.getBricks();
-        this.paddle = mapGenerator.getPaddle();
-        this.totalBricks = mapGenerator.getBricks().size();
     }
 
     // Returns sleep time
@@ -83,20 +77,31 @@ public class GameModel {
     // Return game window height
     public int getGameWindowHeight() { return GAME_WINDOW_HEIGHT; }
 
+    // Set LEVEL value
+    public void setLEVEL(int level) {
+        this.LEVEL = level;
+    }
+
+    // Set DIFFICULTY value
+    public void setDIFFICULTY(String difficulty) {
+        this.DIFFICULTY = difficulty;
+    }
+
     // Starts the game
     public void startGame() {
         isGameRunning = true;
+
+        // Generate map elements(Ball, Paddle, List<Brick>) depends on level and difficulty
+        MapGenerator mapGenerator = new MapGenerator(LEVEL, DIFFICULTY, this);
+        this.paddle = mapGenerator.getPaddle();
+        this.bricks = mapGenerator.getBricks();
+        this.ball = mapGenerator.getBall();
+        this.totalBricks = mapGenerator.getBricks().size();
     }
 
     // Renew the game
     public void renewGame() {
         int prevLives = getLives();
-
-        // Reset game map
-        this.mapGenerator = new MapGenerator(1, "EASY", this);
-        this.paddle = mapGenerator.getPaddle();
-        this.bricks = mapGenerator.getBricks();
-        this.ball = mapGenerator.getBall();
 
         // Reset ball position
         ball.reset();
@@ -105,9 +110,9 @@ public class GameModel {
         setLives(prevLives);
 
         // TODO: Temporary solution until create completeLevel title
-        // Reset total bricks, score and game
-        setTotalBricks(bricks.size());
+        // Reset score and game
         setScore(0);
+        // Reset game state
         startGame();
     }
 

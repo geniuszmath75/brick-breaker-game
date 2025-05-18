@@ -31,8 +31,8 @@ public class GameController {
             if (!model.gamePaused() && model.isGameRunning()) {
                 model.getPaddle().move(); // Move the paddle if the game is not paused
                 model.getBall().move(); // Move the ball if the game is not paused
+                model.getBall().checkCollision(); // Check ball collision if game is not paused
             }
-            model.getBall().checkCollision();
             view.repaint();
         }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
 
@@ -73,21 +73,24 @@ public class GameController {
     // Handles the EASY button click
     class EasyButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+            model.setDIFFICULTY("EASY"); // Select EASY mode
             view.setMainPanel("Level"); // Switch view to levels panel
         }
     }
 
     // Handles the MEDIUM button click
-    static class MediumButtonListener implements ActionListener {
+    class MediumButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("MEDIUM mode selected");
+            model.setDIFFICULTY("MEDIUM"); // Select MEDIUM mode
+            view.setMainPanel("Level"); // Switch view to levels panel
         }
     }
 
     // Handles the HARD button click
-    static class HardButtonListener implements ActionListener {
+    class HardButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("HARD mode selected");
+            model.setDIFFICULTY("HARD"); // Select HARD mode
+            view.setMainPanel("Level"); // Switch view to levels panel
         }
     }
 
