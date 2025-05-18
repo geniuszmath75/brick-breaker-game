@@ -2,6 +2,7 @@ package model;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.List;
 
 public class Ball {
     private double x; // Coordinate X
@@ -11,28 +12,28 @@ public class Ball {
     private double ySpeed = 0.0; // Ball movement speed on Y axis
     private int speed; // General ball movement speed value
     private final GameModel model; // GameModel reference
-    private Paddle paddle; // Paddle reference
-    private Brick brick; // Brick reference
+    private final Paddle paddle; // Paddle reference
+    private final List<Brick> bricks; // Brick list reference
     private boolean stuck = true; // Ball is stuck to the paddle - position on start
 
     // Ball constructor
-    public Ball(double xStart, double yStart, int diameter, GameModel modelInstance, Paddle paddle, Brick brick) {
+    public Ball(double xStart, double yStart, int diameter, int baseSpeed, GameModel modelInstance, Paddle paddle, List<Brick> bricks) {
         this.x = xStart;
         this.y = yStart;
         this.diameter = diameter;
         this.paddle = paddle;
-        this.brick = brick;
+        this.bricks = bricks;
         this.model = modelInstance;
-        setSpeed();
+        setSpeed(baseSpeed);
     }
 
     // Set ball speed based on screen refresh rate
-    private void setSpeed() {
+    private void setSpeed(int baseSpeed) {
         int refreshRate = model.getRefreshRate();
         if (refreshRate <= 0) { // Default to 60 FPS if refresh rate is unknown
             model.setRefreshRate(60);
         }
-        speed = Math.max(1, (int) (3.0 * 144 / refreshRate)); // Calculate speed based on refresh rate
+        speed = baseSpeed + Math.max(1, (int) (3.0 * 144 / refreshRate)); // Calculate speed based on refresh rate and level difficulty
         // 240Hz ~ 1 pixel per frame; 165Hz ~ 2; 144Hz ~ 3; 120Hz ~ 3; 60Hz ~ 7;
     }
 
@@ -185,23 +186,31 @@ public class Ball {
      */
     public void checkCollision() {
         // Create new rectangles for ball and brick to check intersection
-        Rectangle brickRect = new Rectangle((int) brick.getX(), (int) brick.getY(), brick.getBrickWidth(), brick.getBrickHeight());
         Rectangle ballRect = new Rectangle((int) x, (int) y, diameter, diameter);
 
-        // Check if ball intersects with brick
-        if (!ballRect.intersects(brickRect)) return;
+        for(Brick b : bricks) {
+            Rectangle brickRect = new Rectangle((int) b.getX(), (int) b.getY(), b.getBrickWidth(), b.getBrickHeight());
+            // Check if ball intersects with brick
+            if (ballRect.intersects(brickRect)) {
+                // Collision detected
+                b.hit();
 
-        // Collision detected
-        brick.hit();
+                // Check if brick is destroyed
+                if(b.isDestroyed()) {
+                    // Add points
+                    model.increaseScore();
 
-        // Add points
-        model.increaseScore();
+                    // Check if level is cleared
+                    model.checkLevelComplete();
+                }
 
-        // Check if level is cleared
-         model.checkLevelComplete();
-
-        // Reflect ball based on collision with brick
-        reflectFrom(brickRect, false);
+                // Reflect ball based on collision with brick
+                reflectFrom(brickRect, false);
+                break;
+            }
+        }
+        // Update bricks list(remove destroyed elements)
+        updateBricksReference(bricks);
     }
 
     // Start the ball movement
@@ -227,14 +236,9 @@ public class Ball {
         y = paddle.getY() - diameter;
     }
 
-    // Update brick reference
-    public void updateBrickReference(Brick brick) {
-        this.brick = brick;
-    }
-
-    // Update paddle reference
-    public void updatePaddleReference(Paddle paddle) {
-        this.paddle = paddle;
+    // Update bricks reference
+    public void updateBricksReference(List<Brick> bricks) {
+        bricks.removeIf(Brick::isDestroyed);
     }
 
     // Handle ball starting
@@ -242,5 +246,11 @@ public class Ball {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             start();
         }
+    }
+
+    // Draw a ball object
+    public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.WHITE);
+        g2d.fillOval((int) getX(), (int) getY(), getDiameter(), getDiameter());
     }
 }

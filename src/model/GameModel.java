@@ -3,17 +3,32 @@ package model;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.DisplayMode;
+import java.util.List;
 
 public class GameModel {
-    private boolean isGameRunning = false; // Stores the current game state (running or not)
+    /**
+     * MODELS
+     */
+    private Ball ball; // store Ball data
+    private List<Brick> bricks; // store Brick data
     private Paddle paddle; // store Paddle data
-    private final Ball ball; // store Ball data
-    private Brick brick; // store Brick data
+    private MapGenerator mapGenerator; // store map level data
+
+    /**
+     * GAME PARAMETERS
+     */
+    private boolean isGameRunning = false; // Stores the current game state (running or not)
+    private boolean gamePaused = false; // Stores game state (paused or not)
     private int refreshRate; // Calculate sleep time based on refresh rate (in milliseconds)
     private int score = 0; // Player score
     private int lives = 3; // Number of lives
-    // TODO: Temporary value, must be move to the MapGenerator class
-    private int totalBricks = 1; // Total number of bricks
+    private int totalBricks; // Total number of bricks
+
+    /**
+     * OTHER
+     */
+    private final int GAME_WINDOW_WIDTH = 800; // Game window width
+    private final int GAME_WINDOW_HEIGHT = 800; // Game window height
 
     // Init all game models
     public GameModel() {
@@ -24,9 +39,12 @@ public class GameModel {
             refreshRate = 60; // Default to 60 FPS if refresh rate is unknown
         }
 
-        paddle = new Paddle(320, 715, 140, 15, 5); // Init paddle instance
-        brick = new Brick(90, 100, 200, 70, 1,this); // Init brick instance
-        ball = new Ball(paddle.getX() + 65, paddle.getY() - 25, 25, this, paddle, brick); // Init ball instance
+        // Generate map elements(Ball, Paddle, List<Brick>) depends on level and difficulty
+        this.mapGenerator = new MapGenerator(1, "EASY", this);
+        this.ball = mapGenerator.getBall();
+        this.bricks = mapGenerator.getBricks();
+        this.paddle = mapGenerator.getPaddle();
+        this.totalBricks = mapGenerator.getBricks().size();
     }
 
     // Returns sleep time
@@ -40,16 +58,30 @@ public class GameModel {
         return isGameRunning;
     }
 
-    // Returns Paddle instance
-    public Paddle getPaddle() {
-        return paddle;
+    // Check if the game is currently paused
+    public boolean gamePaused() {
+        return gamePaused;
+    }
+
+    // Change if the game is paused or not
+    public void setGamePaused(boolean gamePaused) {
+        this.gamePaused = gamePaused;
     }
 
     // Returns Ball instance
     public Ball getBall() { return ball; }
 
-    // Returns Brick instance
-    public Brick getBrick() { return brick; }
+    // Returns list of Brick instances
+    public List<Brick> getBricks() { return bricks; }
+
+    // Return Paddle instance
+    public Paddle getPaddle() { return paddle; }
+
+    // Return game window width
+    public int getGameWindowWidth() { return GAME_WINDOW_WIDTH; }
+
+    // Return game window height
+    public int getGameWindowHeight() { return GAME_WINDOW_HEIGHT; }
 
     // Starts the game
     public void startGame() {
@@ -60,23 +92,21 @@ public class GameModel {
     public void renewGame() {
         int prevLives = getLives();
 
+        // Reset game map
+        this.mapGenerator = new MapGenerator(1, "EASY", this);
+        this.paddle = mapGenerator.getPaddle();
+        this.bricks = mapGenerator.getBricks();
+        this.ball = mapGenerator.getBall();
+
         // Reset ball position
         ball.reset();
-
-        // Reset brick position
-        brick = new Brick(90, 100, 200, 70, 1, this);
-        ball.updateBrickReference(brick);
-
-        // Reset paddle position
-        paddle = new Paddle(320, 715, 140, 15, 5);
-        ball.updatePaddleReference(paddle);
 
         // Reset previous number of lives
         setLives(prevLives);
 
         // TODO: Temporary solution until create completeLevel title
         // Reset total bricks, score and game
-        setTotalBricks(1);
+        setTotalBricks(bricks.size());
         setScore(0);
         startGame();
     }

@@ -7,6 +7,7 @@ import model.Brick;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class GamePanel extends JPanel {
     private final GameModel model; // Model reference
@@ -23,19 +24,23 @@ public class GamePanel extends JPanel {
     }
 
     // Draw heart shape
-    private void drawHeart(Graphics g, int x) {
+    private void drawHeart(Graphics2D g2d, int x) {
         int[] triangleX = {x + 30 / 2, x, x + 30};
         int[] triangleY = {42, 12 + 30 / 3, 12 + 30 / 3};
 
-        g.fillOval(x, 13, 30 / 2, 30 / 2); // left half of heart
-        g.fillOval(x + 30 / 2, 13, 30 / 2, 30 / 2); // right half of heart
-        g.fillPolygon(triangleX, triangleY, 3); // triangle down part of heart
+        g2d.fillOval(x, 13, 30 / 2, 30 / 2); // left half of heart
+        g2d.fillOval(x + 30 / 2, 13, 30 / 2, 30 / 2); // right half of heart
+        g2d.fillPolygon(triangleX, triangleY, 3); // triangle down part of heart
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         // Call parent paint method
         super.paintComponent(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Get Paddle model
         Paddle paddle = model.getPaddle();
@@ -44,49 +49,43 @@ public class GamePanel extends JPanel {
         Ball ball = model.getBall();
 
         // Drawing bricks
-        Brick brick = model.getBrick();
+        List<Brick> bricks = model.getBricks();
 
         // Drawing paddle
-        g.setColor(Color.WHITE); // Set white paddle color
-        g.fillRoundRect((int) paddle.getX(), (int) paddle.getY(), paddle.getWidth(), paddle.getHeight(), 15, 15);
+        paddle.paint(g2d);
 
         // Drawing ball
-        g.setColor(Color.WHITE);
-        g.fillOval((int) ball.getX(), (int) ball.getY(), ball.getDiameter(), ball.getDiameter());
+        ball.paint(g2d);
 
         // Drawing bricks
-        if (brick.getDestructionLevel() > 0) {
-            g.setColor(brick.getBrickColor());
-            g.fillRoundRect((int) brick.getX(), (int) brick.getY(), brick.getBrickWidth(), brick.getBrickHeight(), 25, 25); // Draw brick
-
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setStroke(new BasicStroke(3)); // Set brick border width
-            g2.setColor(Color.WHITE);
-            g2.drawRoundRect((int) brick.getX(), (int) brick.getY(), brick.getBrickWidth(), brick.getBrickHeight(), 25, 25); // Draw brick border
+        for(Brick b : bricks) {
+            if (!b.isDestroyed()) {
+                b.paint(g2d);
+            }
         }
 
         // Drawing start information text
         if (ball.isStuck() && model.isGameRunning()) {
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-            g.drawString("HIT SPACE TO START", 235, 300);
-            g.drawString("USE ARROW KEYS TO MOVE", 180, 350);
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 30));
+            g2d.drawString("HIT SPACE TO START", 235, 300);
+            g2d.drawString("USE ARROW KEYS TO MOVE", 180, 350);
         }
 
         // Drawing lives
         for (int i = 0; i < startLives; i++) {
             if (i < model.getLives()) { // red hearts for remaining lives
-                g.setColor(Color.RED);
+                g2d.setColor(Color.RED);
             } else {
-                g.setColor(Color.GRAY); // gray hearts for lost lives
+                g2d.setColor(Color.GRAY); // gray hearts for lost lives
             }
-            drawHeart(g, 12 + (i * 40));
+            drawHeart(g2d, 12 + (i * 40));
         }
 
         // Drawing score
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 30));
-        g.drawString("SCORE: " + model.getScore(), 310, 40);
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 30));
+        g2d.drawString("SCORE: " + model.getScore(), 310, 40);
 
         // Drawing game over text
         if (!model.isGameRunning()) {

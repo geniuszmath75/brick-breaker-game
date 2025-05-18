@@ -8,11 +8,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GameController {
     private final GameModel model;  // Stores game state
     private final GameView view;    // Manages game UI
-    private boolean gamePaused = false; // Stores game state (paused or not)
+    private final ScheduledExecutorService executor;
 
     // Initializes the game controller
     public GameController(GameModel model, GameView view) {
@@ -20,18 +23,18 @@ public class GameController {
         this.view = view;
         int refreshRate = model.getRefreshRate();
 
-        // TODO: try to find a better way to refresh game animations - without warnings
-        // create a new thread to refresh move of the ball smoothly
-        new Thread(() -> {
-            while (true) {
-                if (!gamePaused) { model.getBall().move(); } // Move the ball if the game is not paused
-                model.getBall().checkCollision();
-                view.repaint();
-                try {
-                    Thread.sleep(1000 / refreshRate); // sleep based on refresh rate (in milliseconds)
-                } catch (InterruptedException ignored) {}
+        // Using ScheduledExecutor class to replace controlling models movement with Thread
+        // No busy-waiting warnings but remaining performance and smoothing while models moving
+        // Added also Paddle movement to simplify handling model movement
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> {
+            if (!model.gamePaused() && model.isGameRunning()) {
+                model.getPaddle().move(); // Move the paddle if the game is not paused
+                model.getBall().move(); // Move the ball if the game is not paused
             }
-        }).start();
+            model.getBall().checkCollision();
+            view.repaint();
+        }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
@@ -60,8 +63,9 @@ public class GameController {
     }
 
     // Handles the EXIT button click
-    static class ExitListener implements ActionListener {
+    class ExitListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+            executor.shutdown();
             System.exit(0);
         }
     }
@@ -114,7 +118,7 @@ public class GameController {
         @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // If Esc - pause the game
-                gamePaused = true; // stop the game loop flag
+                model.setGamePaused(true); // stop the game loop flag
                 model.getPaddle().stopMoving(); // stop the paddle
 
                 // Show the pause dialog
@@ -136,7 +140,7 @@ public class GameController {
                     model.setScore(0);
                     model.setLives(3);
                 }
-                gamePaused = false; // Continue the game animation refresh
+                model.setGamePaused(false); // Continue the game animation refresh
             } else if (e.getKeyCode() == KeyEvent.VK_SPACE) { // If Space - pass the event to the Ball model
                 model.getBall().keyPressed(e);
             } else { // Else pass the event to the Paddle model

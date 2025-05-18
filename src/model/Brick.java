@@ -8,13 +8,11 @@ public class Brick {
     private final double y; // Coordinate Y
     private final int brickWidth; // Brick width
     private final int brickHeight; // Brick height
-    protected final GameModel model; // GameModel reference
     private final Color brickColor; // Brick color
     private int destructionLevel; // Level of brick destruction
 
     // Brick constructor
-    public Brick(double x, double y, int width, int height, int destruction, GameModel modelInstance) {
-        this.model = modelInstance;
+    public Brick(double x, double y, int width, int height, int destruction) {
         this.x = x;
         this.y = y;
         this.brickWidth = width;
@@ -61,8 +59,18 @@ public class Brick {
         return brickColor;
     }
 
-    // Get destruction level
-    public int getDestructionLevel() {
-        return destructionLevel;
+    // Check if brick is destroyed
+    public boolean isDestroyed() {
+        return destructionLevel <= 0;
+    }
+
+    // Draw a brick object
+    public void paint(Graphics2D g2d) {
+        g2d.setColor(getBrickColor());
+        g2d.fillRoundRect((int) getX(), (int) getY(), getBrickWidth(), getBrickHeight(), 25, 25); // Draw brick
+
+        g2d.setStroke(new BasicStroke(3)); // Set brick border width
+        g2d.setColor(Color.WHITE);
+        g2d.drawRoundRect((int) getX(), (int) getY(), getBrickWidth(), getBrickHeight(), 25, 25); // Draw brick border
     }
 }

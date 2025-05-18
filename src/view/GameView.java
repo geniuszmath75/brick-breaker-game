@@ -16,7 +16,7 @@ public class GameView extends JFrame {
     // Creates and configures the main game window
     public GameView(GameModel model) {
         setTitle("Brick Breaker"); // Set window title
-        setSize(800, 800); // Set window size
+        setSize(model.getGameWindowWidth(), model.getGameWindowHeight()); // Set window size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close app on exit
         setLocationRelativeTo(null); // Center the window on screen
         setResizable(false); // Disable window resizing

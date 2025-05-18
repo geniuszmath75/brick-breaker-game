@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class Paddle {
@@ -18,17 +19,6 @@ public class Paddle {
         this.width = width;
         this.height = height;
         this.speed = speed;
-
-        // New thread to handle paddle movement
-        new Thread(() -> {
-            while (true) {
-                if (movingLeft) { moveLeft(); }
-                if (movingRight) { moveRight(); }
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ignored) {}
-            }
-        }).start();
     }
 
     // Get coordinate X value
@@ -61,6 +51,16 @@ public class Paddle {
         if (x + width < 785) { x += speed; } // moving paddle if it doesn't exceed the right window border
     }
 
+    // Handles paddle movement
+    public void move() {
+        if (movingLeft) {
+            moveLeft();
+        }
+        if (movingRight) {
+            moveRight();
+        }
+    }
+
     // Handle paddle movement
     public void setMoving(int keyCode, boolean isMoving) {
         if (keyCode == KeyEvent.VK_LEFT) {
@@ -74,5 +74,11 @@ public class Paddle {
     public void stopMoving() {
         movingLeft = false;
         movingRight = false;
+    }
+
+    // Draw a paddle object
+    public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.WHITE); // Set white paddle color
+        g2d.fillRoundRect((int) getX(), (int) getY(), getWidth(), getHeight(), 15, 15);
     }
 }
