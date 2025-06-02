@@ -10,31 +10,21 @@ public class Ball {
     private final int diameter; // Diameter of the ball
     private double xSpeed = 0.0; // Ball movement speed on X axis
     private double ySpeed = 0.0; // Ball movement speed on Y axis
-    private int speed; // General ball movement speed value
+    private final int speed; // General ball movement speed value
     private final GameModel model; // GameModel reference
     private final Paddle paddle; // Paddle reference
     private final List<Brick> bricks; // Brick list reference
     private boolean stuck = true; // Ball is stuck to the paddle - position on start
 
     // Ball constructor
-    public Ball(double xStart, double yStart, int diameter, int baseSpeed, GameModel modelInstance, Paddle paddle, List<Brick> bricks) {
+    public Ball(double xStart, double yStart, int diameter, int speed, GameModel modelInstance, Paddle paddle, List<Brick> bricks) {
         this.x = xStart;
         this.y = yStart;
         this.diameter = diameter;
         this.paddle = paddle;
         this.bricks = bricks;
         this.model = modelInstance;
-        setSpeed(baseSpeed);
-    }
-
-    // Set ball speed based on screen refresh rate
-    private void setSpeed(int baseSpeed) {
-        int refreshRate = model.getRefreshRate();
-        if (refreshRate <= 0) { // Default to 60 FPS if refresh rate is unknown
-            model.setRefreshRate(60);
-        }
-        speed = baseSpeed + Math.max(1, (int) (3.0 * 144 / refreshRate)); // Calculate speed based on refresh rate and level difficulty
-        // 240Hz ~ 1 pixel per frame; 165Hz ~ 2; 144Hz ~ 3; 120Hz ~ 3; 60Hz ~ 7;
+        this.speed = speed;
     }
 
     // Get coordinate X value

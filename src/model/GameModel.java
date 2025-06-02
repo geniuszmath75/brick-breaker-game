@@ -47,6 +47,17 @@ public class GameModel {
     // Set sleep time
     public void setRefreshRate(int refreshRate) { this.refreshRate = refreshRate; }
 
+    // Set speed based on screen refresh rate
+    public int setSpeed(int baseSpeed) {
+        int refreshRate = getRefreshRate();
+        if (refreshRate <= 0) { // Default to 60 FPS if refresh rate is unknown
+            setRefreshRate(60);
+        }
+        // Calculate speed based on refresh rate
+        // 240Hz ~ 1 pixel per frame; 165Hz ~ 2; 144Hz ~ 3; 120Hz ~ 3; 60Hz ~ 7;
+        return baseSpeed + Math.max(1, (int) (3.0 * 144 / refreshRate));
+    }
+
     // Checks if the game is currently running
     public boolean isGameRunning() {
         return isGameRunning;

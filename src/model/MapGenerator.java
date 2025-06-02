@@ -40,15 +40,10 @@ public class MapGenerator {
             throw new IllegalStateException("Paddle must be initialized before Ball");
         }
 
-        // Set Ball speed based on DIFFICULTY
-        int speed = switch (DIFFICULTY) {
-            case "medium" -> 1;
-            case "hard" -> 2;
-            default -> 0;
-        };
+        int speed = 0; // Ball base speed
 
         // Initialize Ball object
-        ball = new Ball(paddle.getX(), paddle.getY(), 25, speed, model, paddle, bricks);
+        ball = new Ball(paddle.getX(), paddle.getY(), 25, model.setSpeed(speed), model, paddle, bricks);
     }
 
     // Generate Paddle element on map
@@ -59,37 +54,36 @@ public class MapGenerator {
         // Set paddle base speed and width based on DIFFICULTY
         switch (DIFFICULTY) {
             case "medium": {
-                speed = 7;
-                width = 130;
+                speed = 1;
+                width = 140;
                 break;
             }
             case "hard": {
-                speed = 6;
-                width = 100;
+                speed = 0;
+                width = 120;
                 break;
             }
             // EASY mode
             default: {
-                speed = 8;
+                speed = 2;
                 width = 160;
             }
         }
 
         // Initialize Paddle object
-        paddle = new Paddle(320, 715, width, 15, speed);
+        paddle = new Paddle(320, 715, width, 15, model.setSpeed(speed));
     }
 
     private void generateBricks() {
         int offsetY = 50; // Distance from the window top border
         int padding = 5; // Space between bricks
 
-        int brickWidth = (model.getGameWindowWidth() - 2*padding) / 10 - padding; // GAME_WINDOW_WIDTH = 800 -> brickWidth = 74
+        int brickWidth = (model.getGameWindowWidth() - 2 * padding) / 10 - padding; // GAME_WINDOW_WIDTH = 800 -> brickWidth = 74
         int brickHeight = (model.getGameWindowHeight() - offsetY) / 20 - padding; // GAME_WINDOW_HEIGHT = 800 -> brickHeight = 32
 
         // Set Brick destructionLevel
         int baseDestruction = switch (DIFFICULTY) {
-            case "medium" -> 2;
-            case "hard" -> 3;
+            case "medium", "hard" -> 2;
             default -> 1;
         };
 
