@@ -43,7 +43,10 @@ public class MapGenerator {
         int speed = 0; // Ball base speed
 
         // Initialize Ball object
-        ball = new Ball(paddle.getX(), paddle.getY(), 25, model.setSpeed(speed), model, paddle, bricks);
+        int diameter = 25;
+        double centeredX = paddle.getX() + (paddle.getWidth() / 2.0) - (diameter / 2.0);
+        double centeredY = paddle.getY() - diameter; // correct initial generation of position
+        ball = new Ball(centeredX, centeredY, diameter, model.setSpeed(speed), model, paddle, bricks);
     }
 
     // Generate Paddle element on map
@@ -84,7 +87,7 @@ public class MapGenerator {
         // Set Brick destructionLevel
         int baseDestruction = switch (DIFFICULTY) {
             case "medium", "hard" -> 2;
-            default -> 1;
+            default -> 1; // for easy difficulty
         };
 
         BrickLayout layout = getLayoutForLevel(LEVEL, DIFFICULTY);

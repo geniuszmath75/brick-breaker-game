@@ -26,10 +26,10 @@ public class GameModel {
     private String DIFFICULTY = "EASY"; // Selected game difficulty
 
     /**
-     * OTHER
+     * GAME WINDOW PARAMETERS
      */
-    private final int GAME_WINDOW_WIDTH = 800; // Game window width
-    private final int GAME_WINDOW_HEIGHT = 800; // Game window height
+    private static final int GAME_WINDOW_WIDTH = 800; // Game window width
+    private static final int GAME_WINDOW_HEIGHT = 800; // Game window height
 
     // Init all game models
     public GameModel() {
@@ -144,9 +144,6 @@ public class GameModel {
 
     // Increase player score
     public void increaseScore() { score += 5; }
-
-    // Set total number of bricks
-    public void setTotalBricks(int totalBricks) { this.totalBricks = totalBricks; }
 
     // Check if level is completed (all bricks are destroyed)
     public void checkLevelComplete() {

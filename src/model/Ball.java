@@ -14,7 +14,7 @@ public class Ball {
     private final GameModel model; // GameModel reference
     private final Paddle paddle; // Paddle reference
     private final List<Brick> bricks; // Brick list reference
-    private boolean stuck = true; // Ball is stuck to the paddle - position on start
+    private boolean stuck; // Ball is stuck to the paddle - position on start
 
     // Ball constructor
     public Ball(double xStart, double yStart, int diameter, int speed, GameModel modelInstance, Paddle paddle, List<Brick> bricks) {
@@ -25,6 +25,7 @@ public class Ball {
         this.bricks = bricks;
         this.model = modelInstance;
         this.speed = speed;
+        this.stuck = true;
     }
 
     // Get coordinate X value
@@ -108,7 +109,6 @@ public class Ball {
         }
     }
 
-    // TODO Improve reflection for surface different from the paddle
     /**
      * Reflects the ball from a given surface (paddle or brick).
      * If 'angled' is true, the reflection angle is calculated based on where the ball hits the paddle.
@@ -142,7 +142,6 @@ public class Ball {
                 // Diagonal collision - reverse both directions
                 ySpeed = -ySpeed;
                 xSpeed = -xSpeed;
-                System.out.println("Tunneling detected");
             } else if (Math.abs(widthRatio) > Math.abs(heightRatio)) {
                 // Horizontal collision (left or right side)
                 xSpeed = -xSpeed;
@@ -164,8 +163,15 @@ public class Ball {
         // Calculate how much from the paddle center the ball has hit (-1.0 to 1.0)
         double relativeIntersect = (ballCenter - surfaceCenter) / (surface.getWidth() / 2.0);
 
+        // Clamp the value to the range [-1.0, 1.0] for sure
+        if (relativeIntersect < -1.0) {
+            relativeIntersect = -1.0;
+        } else if (relativeIntersect > 1.0) {
+            relativeIntersect = 1.0;
+        }
+
         // Max angle of reflection: 75deg (in radians)
-        double maxBounceAngle = Math.toRadians(75);
+        double maxBounceAngle = Math.toRadians(65);
 
         return relativeIntersect * maxBounceAngle;
     }
