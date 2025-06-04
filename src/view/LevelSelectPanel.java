@@ -6,7 +6,9 @@ import java.awt.event.ActionListener;
 
 
 public class LevelSelectPanel extends JPanel {
-    private final JButton levelButton; // Select game level
+    private final JButton level1Button; // Select game level 1
+    private final JButton level2Button; // Select game level 2
+    private final JButton level3Button; // Select game level 3
     private final JButton backButton; // Returns to previous panel
 
     public LevelSelectPanel() {
@@ -20,12 +22,20 @@ public class LevelSelectPanel extends JPanel {
         levelLabel.setFont(titleFont);
 
         // Initialize button
-        levelButton = new JButton("1");
+        level1Button = new JButton("1");
+        level1Button.setActionCommand("1");
+        level2Button = new JButton("2");
+        level2Button.setActionCommand("2");
+        level3Button = new JButton("3");
+        level3Button.setActionCommand("3");
+
         backButton = new JButton("Back");
 
         // Panel for buttons
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(levelButton);
+        buttonPanel.add(level1Button);
+        buttonPanel.add(level2Button);
+        buttonPanel.add(level3Button);
 
         // Panel for "return" button
         JPanel backPanel = new JPanel();
@@ -39,11 +49,11 @@ public class LevelSelectPanel extends JPanel {
 
     // Add a listener for the level name button
     public void addLevelListener(ActionListener listener) {
-        levelButton.addActionListener(listener);
+        level1Button.addActionListener(listener);
+        level2Button.addActionListener(listener);
+        level3Button.addActionListener(listener);
     }
 
     // Add a listener for the BACK button
-    public void addBackListener(ActionListener listener) {
-        backButton.addActionListener(listener);
-    }
+    public void addBackListener(ActionListener listener) { backButton.addActionListener(listener); }
 }

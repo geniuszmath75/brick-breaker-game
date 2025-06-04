@@ -48,9 +48,7 @@ public class GameView extends JFrame {
     }
 
     // Returns the menu panel
-    public MenuPanel getMenuPanel() {
-        return menuPanel;
-    }
+    public MenuPanel getMenuPanel() { return menuPanel; }
 
     // Returns the difficulty panel
     public DifficultyPanel getDifficultyPanel() { return difficultyPanel; }

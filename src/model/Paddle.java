@@ -22,24 +22,16 @@ public class Paddle {
     }
 
     // Get coordinate X value
-    public double getX() {
-        return x;
-    }
+    public double getX() { return x; }
 
     // Get coordinate Y value
-    public double getY() {
-        return y;
-    }
+    public double getY() { return y; }
 
     // Get width value of the paddle
-    public int getWidth() {
-        return width;
-    }
+    public int getWidth() { return width; }
 
     // Get height value of the paddle
-    public int getHeight() {
-        return height;
-    }
+    public int getHeight() { return height; }
 
     // Move paddle to left (decrease coordinate X by speed value)
     public void moveLeft() {
@@ -53,12 +45,8 @@ public class Paddle {
 
     // Handles paddle movement
     public void move() {
-        if (movingLeft) {
-            moveLeft();
-        }
-        if (movingRight) {
-            moveRight();
-        }
+        if (movingLeft) { moveLeft(); }
+        if (movingRight) { moveRight(); }
     }
 
     // Handle paddle movement

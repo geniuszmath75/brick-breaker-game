@@ -31,13 +31,9 @@ public class Brick {
         return randomColor;
     }
 
-    public double getX() {
-        return x;
-    }
+    public double getX() { return x; }
 
-    public double getY() {
-        return y;
-    }
+    public double getY() { return y; }
 
     // Get brick width
     public int getBrickWidth() {
@@ -45,24 +41,16 @@ public class Brick {
     }
 
     // Get brick height
-    public int getBrickHeight() {
-        return brickHeight;
-    }
+    public int getBrickHeight() { return brickHeight; }
 
     // Handle ball hit
-    public void hit() {
-        destructionLevel--;
-    }
+    public void hit() { destructionLevel--; }
 
     // Get brick color
-    public Color getBrickColor() {
-        return brickColor;
-    }
+    public Color getBrickColor() { return brickColor; }
 
     // Check if brick is destroyed
-    public boolean isDestroyed() {
-        return destructionLevel <= 0;
-    }
+    public boolean isDestroyed() { return destructionLevel <= 0; }
 
     // Draw a brick object
     public void paint(Graphics2D g2d) {

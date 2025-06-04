@@ -36,9 +36,7 @@ public class MapGenerator {
     // Generate Ball element on map
     private void generateBall() {
         // Check if Paddle is initialized before Ball
-        if(paddle == null) {
-            throw new IllegalStateException("Paddle must be initialized before Ball");
-        }
+        if(paddle == null) { throw new IllegalStateException("Paddle must be initialized before Ball"); }
 
         int speed = 0; // Ball base speed
 
@@ -86,7 +84,8 @@ public class MapGenerator {
 
         // Set Brick destructionLevel
         int baseDestruction = switch (DIFFICULTY) {
-            case "medium", "hard" -> 2;
+            case "medium" -> 2;
+            case "hard" -> 3;
             default -> 1; // for easy difficulty
         };
 
@@ -114,6 +113,16 @@ public class MapGenerator {
                 case "medium" -> BrickLayout.LEVEL_1_MEDIUM;
                 case "hard" -> BrickLayout.LEVEL_1_HARD;
                 default -> BrickLayout.LEVEL_1_EASY;
+            };
+            case 2 -> switch (difficulty) {
+                case "medium" -> BrickLayout.LEVEL_2_MEDIUM;
+                case "hard" -> BrickLayout.LEVEL_2_HARD;
+                default -> BrickLayout.LEVEL_2_EASY;
+            };
+            case 3 -> switch (difficulty) {
+                case "medium" -> BrickLayout.LEVEL_3_MEDIUM;
+                case "hard" -> BrickLayout.LEVEL_3_HARD;
+                default -> BrickLayout.LEVEL_3_EASY;
             };
             default -> BrickLayout.LEVEL_1_EASY;
         };

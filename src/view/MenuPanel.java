@@ -36,12 +36,8 @@ public class MenuPanel extends JPanel {
     }
 
     // Adds a listener for the START button
-    public void addStartListener(ActionListener listener) {
-        startButton.addActionListener(listener);
-    }
+    public void addStartListener(ActionListener listener) { startButton.addActionListener(listener); }
 
     // Adds a listener for the EXIT button
-    public void addExitListener(ActionListener listener) {
-        exitButton.addActionListener(listener);
-    }
+    public void addExitListener(ActionListener listener) { exitButton.addActionListener(listener); }
 }

@@ -68,8 +68,8 @@ public class GamePanel extends JPanel {
         if (ball.isStuck() && model.isGameRunning()) {
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 30));
-            g2d.drawString("HIT SPACE TO START", 235, 500);
-            g2d.drawString("USE ARROW KEYS TO MOVE", 180, 550);
+            g2d.drawString("HIT SPACE TO START", 230, 500);
+            g2d.drawString("USE ARROW KEYS TO MOVE", 175, 550);
         }
 
         // Drawing lives

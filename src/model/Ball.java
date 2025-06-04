@@ -29,24 +29,16 @@ public class Ball {
     }
 
     // Get coordinate X value
-    public double getX() {
-        return x;
-    }
+    public double getX() { return x; }
 
     // Get coordinate Y value
-    public double getY() {
-        return y;
-    }
+    public double getY() { return y; }
 
     // Get diameter value of the ball
-    public int getDiameter() {
-        return diameter;
-    }
+    public int getDiameter() { return diameter; }
 
     // Get ball stuck status
-    public boolean isStuck() {
-        return stuck;
-    }
+    public boolean isStuck() { return stuck; }
 
     /**
      * Moves the ball one step based on current speed.
@@ -191,14 +183,11 @@ public class Ball {
                 // Collision detected
                 b.hit();
 
-                // Check if brick is destroyed
-                if(b.isDestroyed()) {
-                    // Add points
-                    model.increaseScore();
+                // Add points
+                model.increaseScore();
 
-                    // Check if level is cleared
-                    model.checkLevelComplete();
-                }
+                // Check if brick is destroyed and then if level is cleared
+                if(b.isDestroyed()) { model.checkLevelComplete(); }
 
                 // Reflect ball based on collision with brick
                 reflectFrom(brickRect, false);
@@ -233,9 +222,7 @@ public class Ball {
     }
 
     // Update bricks reference
-    public void updateBricksReference(List<Brick> bricks) {
-        bricks.removeIf(Brick::isDestroyed);
-    }
+    public void updateBricksReference(List<Brick> bricks) { bricks.removeIf(Brick::isDestroyed); }
 
     // Handle ball starting
     public void keyPressed(KeyEvent e) {
