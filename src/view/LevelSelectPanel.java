@@ -1,5 +1,7 @@
 package view;
 
+import utils.SoundLoader;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -49,11 +51,20 @@ public class LevelSelectPanel extends JPanel {
 
     // Add a listener for the level name button
     public void addLevelListener(ActionListener listener) {
-        level1Button.addActionListener(listener);
-        level2Button.addActionListener(listener);
-        level3Button.addActionListener(listener);
+        ActionListener wrapper = e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        };
+        level1Button.addActionListener(wrapper);
+        level2Button.addActionListener(wrapper);
+        level3Button.addActionListener(wrapper);
     }
 
     // Add a listener for the BACK button
-    public void addBackListener(ActionListener listener) { backButton.addActionListener(listener); }
+    public void addBackListener(ActionListener listener) {
+        backButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 }

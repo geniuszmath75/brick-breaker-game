@@ -3,9 +3,14 @@ package model;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.DisplayMode;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class GameModel {
     /**
@@ -24,16 +29,21 @@ public class GameModel {
     private final Map<String, Integer> unlockedLevels = new HashMap<>(); // Stores unlocked levels
     private int refreshRate; // Calculate sleep time based on refresh rate (in milliseconds)
     private int score = 0; // Player score
+    private int maxScore = 0; // Maximum score achieved by the player
     private int lives = 3; // Number of lives
     private int totalBricks; // Total number of bricks
     private int LEVEL = 1; // Selected game level
     private String DIFFICULTY = "EASY"; // Selected game difficulty
+    private boolean endlessModeActivated = false;
 
     /**
      * GAME WINDOW PARAMETERS
      */
     private static final int GAME_WINDOW_WIDTH = 800; // Game window width
     private static final int GAME_WINDOW_HEIGHT = 800; // Game window height
+
+    // File for saving game progress (passed levels)
+    private static final String PROGRESS_FILE = "progress.properties";
 
     // Init all game models
     public GameModel() {
@@ -46,6 +56,8 @@ public class GameModel {
         unlockedLevels.put("EASY", 1);
         unlockedLevels.put("MEDIUM", 1);
         unlockedLevels.put("HARD", 1);
+
+        loadProgress();
     }
 
     // Returns sleep time
@@ -109,6 +121,8 @@ public class GameModel {
         this.bricks = mapGenerator.getBricks();
         this.ball = mapGenerator.getBall();
         this.totalBricks = mapGenerator.getBricks().size();
+
+        setScore(0);
     }
 
     // Renew the game
@@ -138,11 +152,21 @@ public class GameModel {
     // Get player score
     public int getScore() { return score; }
 
+    // Get maximum player score
+    public int getMaxScore() { return maxScore; }
+
     // Set player score
-    public void setScore(int score) { this.score = score; }
+    public void setScore(int score) {
+        this.score = score;
+
+        if (score > maxScore) {
+            maxScore = score;
+            saveProgress();
+        }
+    }
 
     // Increase player score
-    public void increaseScore() { score += 5; }
+    public void increaseScore() { setScore(score += 5); }
 
     // Check if level is completed (all bricks are destroyed)
     public void checkLevelComplete() {
@@ -165,7 +189,56 @@ public class GameModel {
     // Unlock the next level for the current difficulty
     public void unlockNextLevel() {
         int currentUnlocked = unlockedLevels.getOrDefault(DIFFICULTY, 1);
-        if (LEVEL >= currentUnlocked) { unlockedLevels.put(DIFFICULTY, LEVEL + 1); }
+        if (LEVEL >= currentUnlocked) {
+            unlockedLevels.put(DIFFICULTY, LEVEL + 1);
+            saveProgress();
+        }
+    }
+
+    // Get the current unlocked levels
+    public Map<String,Integer> getUnlockedLevels() { return new HashMap<>(unlockedLevels); }
+
+    // Saves the game progress to a file
+    private void saveProgress() {
+        Properties props = new Properties();
+        for (var entry : unlockedLevels.entrySet()) {
+            props.setProperty(entry.getKey(), entry.getValue().toString());
+        }
+        props.setProperty("MAXSCORE", Integer.toString(maxScore));
+
+        try (FileOutputStream fos = new FileOutputStream(PROGRESS_FILE)) {
+            props.store(fos, "BrickBreaker Progress");
+        } catch (IOException e) {
+            System.err.println("Failed to save progress: " + e.getMessage());
+        }
+    }
+
+    // Load the game progress from a file
+    private void loadProgress() {
+        File f = new File(PROGRESS_FILE);
+        if (!f.exists()) { return; } // file does not exist -> we do nothing, default levels are unlocked
+
+        Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream(f)) {
+            props.load(fis);
+            // Read from Properties: if key exists, put into unlockedLevels
+            String easyVal = props.getProperty("EASY");
+            String medVal  = props.getProperty("MEDIUM");
+            String hardVal = props.getProperty("HARD");
+            if (easyVal != null) unlockedLevels.put("EASY", Integer.parseInt(easyVal));
+            if (medVal != null) unlockedLevels.put("MEDIUM", Integer.parseInt(medVal));
+            if (hardVal != null) unlockedLevels.put("HARD", Integer.parseInt(hardVal));
+
+            // Load maxScore
+            String hsVal = props.getProperty("MAXSCORE");
+            if (hsVal != null) {
+                maxScore = Integer.parseInt(hsVal);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load progress: " + e.getMessage());
+        } catch (NumberFormatException nfe) {
+            System.err.println("Incorrect progress format in file: " + nfe.getMessage());
+        }
     }
 
     // Get total number of bricks
@@ -182,4 +255,8 @@ public class GameModel {
     public boolean isLevelCompleted() { return levelCompleted; }
 
     public void setLevelCompleted(boolean levelCompleted) { this.levelCompleted = levelCompleted; }
+
+    public boolean isEndlessModeActivated() { return endlessModeActivated; }
+
+    public void setEndlessModeActivated(boolean endlessModeActivated) { this.endlessModeActivated = endlessModeActivated; }
 }

@@ -1,5 +1,7 @@
 package model;
 
+import utils.SoundLoader;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -75,6 +77,7 @@ public class Ball {
         Rectangle ballRect = new Rectangle((int) x, (int) y, diameter, diameter);
 
         if (ballRect.intersects(paddleRect)) {
+            SoundLoader.playWAV("/sounds/pong.wav");
             y = paddle.getY() - diameter; // Adjust position to avoid multiple collisions
             reflectFrom(paddleRect, true); // Angled reflection from paddle
         }
@@ -180,6 +183,9 @@ public class Ball {
             Rectangle brickRect = new Rectangle((int) b.getX(), (int) b.getY(), b.getBrickWidth(), b.getBrickHeight());
             // Check if ball intersects with brick
             if (ballRect.intersects(brickRect)) {
+
+                SoundLoader.playWAV("/sounds/ring.wav");
+
                 // Collision detected
                 b.hit();
 
@@ -210,9 +216,7 @@ public class Ball {
     // Reset ball position after it's out of the down border
     public void reset() {
         model.setLives(model.getLives() - 1);
-        if (model.getLives() <= 0) { // decrease lives
-            model.stopGame(); // if 0 lives - game over
-        }
+        if (model.getLives() <= 0) { model.stopGame(); } // decrease lives, if 0 lives - game over
 
         stuck = true; // reset ball position
         xSpeed = 0;
@@ -226,9 +230,7 @@ public class Ball {
 
     // Handle ball starting
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            start();
-        }
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) { start(); }
     }
 
     // Draw a ball object

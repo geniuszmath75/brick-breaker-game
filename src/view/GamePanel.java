@@ -4,6 +4,7 @@ import model.Ball;
 import model.GameModel;
 import model.Paddle;
 import model.Brick;
+import utils.SoundLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,12 +36,9 @@ public class GamePanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        // Call parent paint method
         super.paintComponent(g);
-
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Get Paddle model
         Paddle paddle = model.getPaddle();
@@ -48,8 +46,9 @@ public class GamePanel extends JPanel {
         // Get Ball model
         Ball ball = model.getBall();
 
-        // Drawing bricks
+        // We take the original list and make a copy of it
         List<Brick> bricks = model.getBricks();
+        List<Brick> bricksCopy = new java.util.ArrayList<>(bricks);
 
         // Drawing paddle
         paddle.paint(g2d);
@@ -58,10 +57,8 @@ public class GamePanel extends JPanel {
         ball.paint(g2d);
 
         // Drawing bricks
-        for(Brick b : bricks) {
-            if (!b.isDestroyed()) {
-                b.paint(g2d);
-            }
+        for (Brick b : bricksCopy) {
+            if (!b.isDestroyed()) { b.paint(g2d); }
         }
 
         // Drawing start information text
@@ -106,10 +103,10 @@ public class GamePanel extends JPanel {
                         "RESTART"
                 );
 
+                SoundLoader.playWAV("/sounds/trzask.wav");
+
                 // If user chooses to go back to the menu
-                if (option != JOptionPane.YES_OPTION) {
-                    view.setMainPanel("Menu");
-                }
+                if (option != JOptionPane.YES_OPTION) { view.setMainPanel("Menu"); }
 
                 // Restart the game, score and lives
                 model.renewGame();

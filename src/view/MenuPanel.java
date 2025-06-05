@@ -1,6 +1,7 @@
 package view;
 
 import utils.FontLoader;
+import utils.SoundLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,6 +9,7 @@ import java.awt.event.ActionListener;
 
 public class MenuPanel extends JPanel {
     private final JButton startButton; // Button to start the game
+    private final JButton statsButton;  // Button to see stats
     private final JButton exitButton;  // Button to exit the game
 
     // Creates the main menu layout
@@ -23,11 +25,13 @@ public class MenuPanel extends JPanel {
 
         // Initialize buttons
         startButton = new JButton("START");
+        statsButton = new JButton("SEE STATS");
         exitButton = new JButton("EXIT");
 
         // Panel for buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(startButton);
+        buttonPanel.add(statsButton);
         buttonPanel.add(exitButton);
 
         // Add components to panel
@@ -36,8 +40,26 @@ public class MenuPanel extends JPanel {
     }
 
     // Adds a listener for the START button
-    public void addStartListener(ActionListener listener) { startButton.addActionListener(listener); }
+    public void addStartListener(ActionListener listener) {
+        startButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
+
+    // Adds a listener for the STATS button
+    public void addStatsListener(ActionListener listener) {
+        statsButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 
     // Adds a listener for the EXIT button
-    public void addExitListener(ActionListener listener) { exitButton.addActionListener(listener); }
+    public void addExitListener(ActionListener listener) {
+        exitButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 }

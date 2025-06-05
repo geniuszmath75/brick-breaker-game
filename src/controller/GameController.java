@@ -1,13 +1,16 @@
 package controller;
 
 import model.GameModel;
+import utils.SoundLoader;
 import view.GameView;
 
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +19,7 @@ public class GameController {
     private final GameModel model;  // Stores game state
     private final GameView view;    // Manages game UI
     private final ScheduledExecutorService executor;
+    private Clip backgroundClip;
 
     // Initializes the game controller
     public GameController(GameModel model, GameView view) {
@@ -43,6 +47,7 @@ public class GameController {
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
+        view.getMenuPanel().addStatsListener(new StatsListener());
         view.getMenuPanel().addExitListener(new ExitListener());
 
         // Add button listeners from the difficulty panel
@@ -63,6 +68,38 @@ public class GameController {
     // Handles the START button click
     class StartListener implements ActionListener {
         public void actionPerformed(ActionEvent e) { view.setMainPanel("Difficulty"); } // Switch view to difficulty panel
+    }
+
+    // Handles the STATS button click
+    class StatsListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Get statistics from the model
+            int maxScore = model.getMaxScore();
+            String text = getString(maxScore);
+
+            // Display in a simple JOptionPane:
+            JOptionPane.showMessageDialog(
+                    view.getMenuPanel(),
+                    text,
+                    "Statistics",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            SoundLoader.playWAV("/sounds/trzask.wav");
+        }
+
+        private String getString(int maxScore) {
+            Map<String,Integer> unlocked = model.getUnlockedLevels();
+
+            // Build the text to display
+            return " "
+                    + "=== Game Stats ===\n\n"
+                    + "Max Score: " + maxScore + "\n\n"
+                    + "Unlocked Levels:\n"
+                    + "  EASY:   Level " + unlocked.getOrDefault("EASY", 1) + "\n"
+                    + "  MEDIUM: Level " + unlocked.getOrDefault("MEDIUM", 1) + "\n"
+                    + "  HARD:   Level " + unlocked.getOrDefault("HARD", 1) + "\n";
+        }
     }
 
     // Handles the EXIT button click
@@ -108,18 +145,21 @@ public class GameController {
                 if (model.canSelectLevel(chosenLevel)) {
                     model.setLEVEL(chosenLevel);
                     model.startGame();
+                    if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
                     view.setMainPanel("Game");
                 } else {
                     JOptionPane.showMessageDialog(null,
                             "You have to pass level " + (chosenLevel - 1) + " first :)",
                             "Level still locked",
                             JOptionPane.WARNING_MESSAGE);
+                    SoundLoader.playWAV("/sounds/trzask.wav");
                 }
 
             } catch (NumberFormatException ex) {
                 // fallback — if something goes wrong, start from level 1
                 model.setLEVEL(1);
                 model.startGame();
+                if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
                 view.setMainPanel("Game");
             }
         }
@@ -132,7 +172,10 @@ public class GameController {
         // BACK button listener constructor
         public BackButtonListener(String panelName) { this.panelName = panelName; }
 
-        public void actionPerformed(ActionEvent e) { view.setMainPanel(panelName); } // Returns to menu panel
+        public void actionPerformed(ActionEvent e) {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            view.setMainPanel(panelName);
+        } // Returns to menu panel
      }
 
     // Handles keyboard events
@@ -140,6 +183,7 @@ public class GameController {
         @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // If Esc - pause the game
+                SoundLoader.pauseClip(backgroundClip);
                 model.setGamePaused(true); // stop the game loop flag
                 model.getPaddle().stopMoving(); // stop the paddle
 
@@ -155,14 +199,25 @@ public class GameController {
                         "CONTINUE"
                 );
 
+                SoundLoader.playWAV("/sounds/trzask.wav");
+
                 // If user chooses to go back to the menu
                 if (option == JOptionPane.NO_OPTION) {
+                    if (backgroundClip != null) {
+                        SoundLoader.stopClip(backgroundClip);
+                        backgroundClip = null;
+                    }
                     view.setMainPanel("Menu");
                     model.renewGame();
                     model.setScore(0);
                     model.setLives(3);
+                } else {
+                    // User selected "CONTINUE" → resume music exactly from where we stopped it
+                    model.setGamePaused(false);
+                    if (backgroundClip != null) {
+                        SoundLoader.resumeClip(backgroundClip);
+                    }
                 }
-                model.setGamePaused(false); // Continue the game animation refresh
             } else if (e.getKeyCode() == KeyEvent.VK_SPACE) { // If Space - pass the event to the Ball model
                 model.getBall().keyPressed(e);
             } else { // Else pass the event to the Paddle model
@@ -171,31 +226,36 @@ public class GameController {
         }
 
         @Override
-        public void keyReleased(KeyEvent e) {
-            model.getPaddle().setMoving(e.getKeyCode(), false); // Pass the event to the Paddle model
-        }
+        public void keyReleased(KeyEvent e) { model.getPaddle().setMoving(e.getKeyCode(), false); } // Pass the event to the Paddle model
     }
 
     // Handles the level completion logic
     private void handleLevelCompletion() {
         SwingUtilities.invokeLater(() -> {
             int currentLevel = model.getLEVEL();
-            // If level 3, endless mode: we only reset the blocks and continue
+            // If level 3, endless mode: only reset the blocks and continue
             if (currentLevel == 3) {
-                JOptionPane.showMessageDialog(
-                        view.getGamePanel(),
-                        "Level 3 completed! Now you are in endless mode.\n Watch out for your lives and max out score :)",
-                        "Endless Mode",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                if (!model.isEndlessModeActivated()) {
+                    SoundLoader.pauseClip(backgroundClip);
+                    JOptionPane.showMessageDialog(
+                            view.getGamePanel(),
+                            "Level 3 completed! Now you are in endless mode.\n Watch your lives and max out score :)",
+                            "Endless Mode",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                    SoundLoader.playWAV("/sounds/trzask.wav");
+                    if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
+                    model.setEndlessModeActivated(true);
+                }
                 model.resetBricksOnly();
                 model.setGamePaused(false);
             }
-            // Level 1 or 2 – we ask what's next
+            // Level 1 or 2 – ask what's next
             else {
+                SoundLoader.pauseClip(backgroundClip);
                 int choice = JOptionPane.showOptionDialog(
                         view.getGamePanel(),
-                        "Level Completed! \n What do you want to do?",
+                        "What do you want to do?",
                         "Level Completed",
                         JOptionPane.DEFAULT_OPTION,
                         JOptionPane.QUESTION_MESSAGE,
@@ -204,23 +264,33 @@ public class GameController {
                         "Next level"
                 );
 
+                SoundLoader.playWAV("/sounds/trzask.wav");
+
                 switch (choice) {
                     case 0 -> { // Replay Level
                         model.setLevelCompleted(false);
+                        model.setLives(3);
                         model.renewGame();
                         model.startGame();
                         model.setGamePaused(false);
                         view.setMainPanel("Game");
+                        if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
                     }
                     case 1 -> { // Go to the next level
                         model.setLevelCompleted(false);
                         model.setLEVEL(currentLevel + 1);
+                        model.setLives(3);
                         model.renewGame();
                         model.startGame();
                         model.setGamePaused(false);
                         view.setMainPanel("Game");
+                        if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
                     }
                     default -> { // Back to menu
+                        if (backgroundClip != null) {
+                            SoundLoader.stopClip(backgroundClip);
+                            backgroundClip = null;
+                        }
                         model.setLevelCompleted(false);
                         model.renewGame();
                         model.setScore(0);

@@ -1,5 +1,7 @@
 package view;
 
+import utils.SoundLoader;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -43,14 +45,34 @@ public class DifficultyPanel extends JPanel {
     }
 
     // Adds a listener for the EASY button
-    public void addEasyListener(ActionListener listener) { easyModeButton.addActionListener(listener); }
+    public void addEasyListener(ActionListener listener) {
+        easyModeButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 
     // Adds a listener for the MEDIUM button
-    public void addMediumListener(ActionListener listener) { mediumModeButton.addActionListener(listener); }
+    public void addMediumListener(ActionListener listener) {
+        mediumModeButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 
     // Adds a listener for the HARD button
-    public void addHardListener(ActionListener listener) { hardModeButton.addActionListener(listener); }
+    public void addHardListener(ActionListener listener) {
+        hardModeButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 
     // Adds a listener for the BACK button
-    public void addBackListener(ActionListener listener) { backButton.addActionListener(listener); }
+    public void addBackListener(ActionListener listener) {
+        backButton.addActionListener(e -> {
+            SoundLoader.playWAV("/sounds/trzask.wav");
+            listener.actionPerformed(e);
+        });
+    }
 }
