@@ -57,7 +57,7 @@ public class GameModel {
         unlockedLevels.put("MEDIUM", 1);
         unlockedLevels.put("HARD", 1);
 
-        loadProgress();
+        loadProgress(); // Load previously saved game progress
     }
 
     // Returns sleep time
@@ -69,9 +69,8 @@ public class GameModel {
     // Set speed based on screen refresh rate
     public int setSpeed(int baseSpeed) {
         int refreshRate = getRefreshRate();
-        if (refreshRate <= 0) { // Default to 60 FPS if refresh rate is unknown
-            setRefreshRate(60);
-        }
+        if (refreshRate <= 0) { setRefreshRate(60); } // Default to 60 FPS if refresh rate is unknown
+
         // Calculate speed based on refresh rate
         // 240Hz ~ 1 pixel per frame; 165Hz ~ 2; 144Hz ~ 3; 120Hz ~ 3; 60Hz ~ 7;
         return baseSpeed + Math.max(1, (int) (3.0 * 144 / refreshRate));

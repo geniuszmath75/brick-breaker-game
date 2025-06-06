@@ -41,6 +41,10 @@ public class GameController {
                     model.setGamePaused(true);
                     handleLevelCompletion();
                 }
+
+                if (!model.isGameRunning()) {
+                    SwingUtilities.invokeLater(this::showGameOverDialog);
+                }
             }
             view.repaint();
         }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
@@ -79,13 +83,8 @@ public class GameController {
             String text = getString(maxScore);
 
             // Display in a simple JOptionPane:
-            JOptionPane.showMessageDialog(
-                    view.getMenuPanel(),
-                    text,
-                    "Statistics",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            JOptionPane.showMessageDialog(view.getMenuPanel(), text, "Statistics", JOptionPane.INFORMATION_MESSAGE);
+            SoundLoader.playWAV("/sounds/crash.wav");
         }
 
         private String getString(int maxScore) {
@@ -144,6 +143,7 @@ public class GameController {
 
                 if (model.canSelectLevel(chosenLevel)) {
                     model.setLEVEL(chosenLevel);
+                    model.setGamePaused(false);
                     model.startGame();
                     if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
                     view.setMainPanel("Game");
@@ -152,12 +152,13 @@ public class GameController {
                             "You have to pass level " + (chosenLevel - 1) + " first :)",
                             "Level still locked",
                             JOptionPane.WARNING_MESSAGE);
-                    SoundLoader.playWAV("/sounds/trzask.wav");
+                    SoundLoader.playWAV("/sounds/crash.wav");
                 }
 
             } catch (NumberFormatException ex) {
                 // fallback — if something goes wrong, start from level 1
                 model.setLEVEL(1);
+                model.setGamePaused(false);
                 model.startGame();
                 if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
                 view.setMainPanel("Game");
@@ -173,7 +174,7 @@ public class GameController {
         public BackButtonListener(String panelName) { this.panelName = panelName; }
 
         public void actionPerformed(ActionEvent e) {
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            SoundLoader.playWAV("/sounds/crash.wav");
             view.setMainPanel(panelName);
         } // Returns to menu panel
      }
@@ -199,7 +200,7 @@ public class GameController {
                         "CONTINUE"
                 );
 
-                SoundLoader.playWAV("/sounds/trzask.wav");
+                SoundLoader.playWAV("/sounds/crash.wav");
 
                 // If user chooses to go back to the menu
                 if (option == JOptionPane.NO_OPTION) {
@@ -243,7 +244,7 @@ public class GameController {
                             "Endless Mode",
                             JOptionPane.INFORMATION_MESSAGE
                     );
-                    SoundLoader.playWAV("/sounds/trzask.wav");
+                    SoundLoader.playWAV("/sounds/crash.wav");
                     if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
                     model.setEndlessModeActivated(true);
                 }
@@ -264,7 +265,7 @@ public class GameController {
                         "Next level"
                 );
 
-                SoundLoader.playWAV("/sounds/trzask.wav");
+                SoundLoader.playWAV("/sounds/crash.wav");
 
                 switch (choice) {
                     case 0 -> { // Replay Level
@@ -300,5 +301,48 @@ public class GameController {
                 }
             }
         });
+    }
+
+    private void showGameOverDialog() {
+        // Gdy już weszliśmy tu, model.isGameRunning()==false, więc pauzujemy dźwięk:
+        SoundLoader.pauseClip(backgroundClip);
+
+        // Ustawiamy flagę, żeby dialog się nie powtarzał wielokrotnie w jednej rundzie:
+        model.setGamePaused(true);
+
+        int option = JOptionPane.showOptionDialog(
+                view.getGamePanel(),
+                "Do you want to restart the game or go back to the menu?",
+                "GAME OVER",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                new String[]{"RESTART", "MENU"},
+                "RESTART"
+        );
+        SoundLoader.playWAV("/sounds/crash.wav");
+
+        if (option == JOptionPane.YES_OPTION) {
+            // Wznów od nowa (restart tego samego poziomu)
+            model.renewGame();
+            model.setScore(0);
+            model.setLives(3);
+            model.setGamePaused(false);
+            // Wznowienie muzyki od ostatniej pozycji:
+            if (backgroundClip != null) {
+                SoundLoader.resumeClip(backgroundClip);
+            }
+            view.setMainPanel("Game");
+        } else {
+            // Powrót do menu – zamykamy klip na dobre:
+            if (backgroundClip != null) {
+                SoundLoader.stopClip(backgroundClip);
+                backgroundClip = null;
+            }
+            model.renewGame();
+            model.setScore(0);
+            model.setLives(3);
+            view.setMainPanel("Menu");
+        }
     }
 }

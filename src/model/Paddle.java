@@ -34,14 +34,10 @@ public class Paddle {
     public int getHeight() { return height; }
 
     // Move paddle to left (decrease coordinate X by speed value)
-    public void moveLeft() {
-        if (x - speed >= 0) { x -= speed; } // moving paddle if it doesn't exceed the left window border
-    }
+    public void moveLeft() { if (x - speed >= 0) { x -= speed; } } // moving paddle if it doesn't exceed the left window border
 
     // Move paddle to right (increase coordinate X by speed value)
-    public void moveRight() {
-        if (x + width < 785) { x += speed; } // moving paddle if it doesn't exceed the right window border
-    }
+    public void moveRight() { if (x + width < 785) { x += speed; } } // moving paddle if it doesn't exceed the right window border
 
     // Handles paddle movement
     public void move() {

@@ -62,6 +62,7 @@ public class Ball {
 
         // Ball has fallen below the paddle
         if (this.getY() >= paddle.getY() + paddle.getHeight()) {
+            SoundLoader.playWAV("/sounds/brunch.wav");
             reset();
             return;
         }

@@ -4,7 +4,6 @@ import model.Ball;
 import model.GameModel;
 import model.Paddle;
 import model.Brick;
-import utils.SoundLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,14 +11,11 @@ import java.util.List;
 
 public class GamePanel extends JPanel {
     private final GameModel model; // Model reference
-    private final GameView view; // View reference
-    private boolean gameOverDisplayed = false; // Game over message displayed flag
     private final int startLives; // Initial number of lives
 
     // GamePanel constructor
-    public GamePanel(GameModel model, GameView view) {
+    public GamePanel(GameModel model) {
         this.model = model;
-        this.view = view;
         this.startLives = model.getLives();
         setBackground(Color.BLACK); // set black background color
     }
@@ -83,37 +79,5 @@ public class GamePanel extends JPanel {
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 30));
         g2d.drawString("SCORE: " + model.getScore(), 310, 40);
-
-        // Drawing game over text
-        if (!model.isGameRunning()) {
-            model.setLives(0); // Set lives to 0 to prevent further drawing and hide ball
-            paddle.stopMoving();
-
-            if (!gameOverDisplayed) {
-                gameOverDisplayed = true;
-
-                int option = JOptionPane.showOptionDialog(
-                        this,
-                        "Do you want to restart the game or go back to the menu?",
-                        "GAME OVER",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        new String[]{"RESTART", "MENU"},
-                        "RESTART"
-                );
-
-                SoundLoader.playWAV("/sounds/trzask.wav");
-
-                // If user chooses to go back to the menu
-                if (option != JOptionPane.YES_OPTION) { view.setMainPanel("Menu"); }
-
-                // Restart the game, score and lives
-                model.renewGame();
-                model.setScore(0);
-                model.setLives(3);
-                gameOverDisplayed = false;
-            }
-        }
     }
 }

@@ -52,7 +52,7 @@ public class LevelSelectPanel extends JPanel {
     // Add a listener for the level name button
     public void addLevelListener(ActionListener listener) {
         ActionListener wrapper = e -> {
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         };
         level1Button.addActionListener(wrapper);
@@ -63,7 +63,7 @@ public class LevelSelectPanel extends JPanel {
     // Add a listener for the BACK button
     public void addBackListener(ActionListener listener) {
         backButton.addActionListener(e -> {
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         });
     }

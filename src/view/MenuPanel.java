@@ -25,7 +25,7 @@ public class MenuPanel extends JPanel {
 
         // Initialize buttons
         startButton = new JButton("START");
-        statsButton = new JButton("SEE STATS");
+        statsButton = new JButton("STATS");
         exitButton = new JButton("EXIT");
 
         // Panel for buttons
@@ -42,7 +42,7 @@ public class MenuPanel extends JPanel {
     // Adds a listener for the START button
     public void addStartListener(ActionListener listener) {
         startButton.addActionListener(e -> {
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         });
     }
@@ -50,7 +50,7 @@ public class MenuPanel extends JPanel {
     // Adds a listener for the STATS button
     public void addStatsListener(ActionListener listener) {
         statsButton.addActionListener(e -> {
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         });
     }
@@ -58,7 +58,7 @@ public class MenuPanel extends JPanel {
     // Adds a listener for the EXIT button
     public void addExitListener(ActionListener listener) {
         exitButton.addActionListener(e -> {
-            SoundLoader.playWAV("/sounds/trzask.wav");
+            SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         });
     }
