@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+
 public class GameController {
     private final GameModel model;  // Stores game state
     private final GameView view;    // Manages game UI
@@ -25,29 +26,6 @@ public class GameController {
     public GameController(GameModel model, GameView view) {
         this.model = model;
         this.view = view;
-        int refreshRate = model.getRefreshRate();
-
-        // Using ScheduledExecutor class to replace controlling models movement with Thread
-        // No busy-waiting warnings but remaining performance and smoothing while models moving
-        // Added also Paddle movement to simplify handling model movement
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> {
-            if (!model.gamePaused() && model.isGameRunning()) {
-                model.getPaddle().move(); // Move the paddle if the game is not paused
-                model.getBall().move(); // Move the ball if the game is not paused
-                model.getBall().checkCollision(); // Check ball collision if game is not paused
-
-                if (model.isLevelCompleted()) {
-                    model.setGamePaused(true);
-                    handleLevelCompletion();
-                }
-
-                if (!model.isGameRunning()) {
-                    SwingUtilities.invokeLater(this::showGameOverDialog);
-                }
-            }
-            view.repaint();
-        }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
 
         // Add button listeners from the menu panel
         view.getMenuPanel().addStartListener(new StartListener());
@@ -67,6 +45,39 @@ public class GameController {
         // Add key listeners from the main game panel
         view.getGamePanel().addKeyListener(new KeyHandler());
         view.getGamePanel().setFocusable(true);
+
+        // Using ScheduledExecutor class to replace controlling models movement with Thread
+        executor = Executors.newSingleThreadScheduledExecutor();
+
+    }
+
+    // Starting executor logic
+    // No busy-waiting warnings but remaining performance and smoothing while models moving
+    // Added also Paddle movement to simplify handling model movement
+    private void startExecutor() {
+        int refreshRate = model.getRefreshRate();
+
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                if (!model.gamePaused() && model.isGameRunning()) {
+                    model.getPaddle().move(); // Move the paddle if the game is not paused
+                    model.getBall().move(); // Move the ball if the game is not paused
+                    model.getBall().checkCollision(); // Check ball collision if game is not paused
+
+                    if (model.isLevelCompleted()) {
+                        model.setGamePaused(true);
+                        handleLevelCompletion();
+                    }
+
+                    if (!model.isGameRunning()) {
+                        SwingUtilities.invokeLater(this::showGameOverDialog);
+                    }
+                }
+                view.repaint();
+            } catch (Exception e) {
+                System.err.println("Error: " + e);
+            }
+        }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
     }
 
     // Handles the START button click
@@ -145,6 +156,7 @@ public class GameController {
                     model.setLEVEL(chosenLevel);
                     model.setGamePaused(false);
                     model.startGame();
+                    startExecutor();
                     if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
                     view.setMainPanel("Game");
                 } else {
@@ -160,6 +172,7 @@ public class GameController {
                 model.setLEVEL(1);
                 model.setGamePaused(false);
                 model.startGame();
+                startExecutor();
                 if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
                 view.setMainPanel("Game");
             }
