@@ -15,12 +15,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
 public class GameController {
     private final GameModel model;  // Stores game state
     private final GameView view;    // Manages game UI
-    private final ScheduledExecutorService executor;
+    private ScheduledExecutorService executor;
     private Clip backgroundClip;
+    private boolean executorStarted = false;
 
     // Initializes the game controller
     public GameController(GameModel model, GameView view) {
@@ -45,16 +45,23 @@ public class GameController {
         // Add key listeners from the main game panel
         view.getGamePanel().addKeyListener(new KeyHandler());
         view.getGamePanel().setFocusable(true);
+    }
 
-        // Using ScheduledExecutor class to replace controlling models movement with Thread
-        executor = Executors.newSingleThreadScheduledExecutor();
-
+    // Check if executor is running
+    private boolean isExecutorRunning() {
+        return executorStarted && executor != null && !executor.isShutdown();
     }
 
     // Starting executor logic
     // No busy-waiting warnings but remaining performance and smoothing while models moving
     // Added also Paddle movement to simplify handling model movement
     private void startExecutor() {
+        if (!isExecutorRunning()) {
+            executor = Executors.newSingleThreadScheduledExecutor();
+        }
+
+        executorStarted = true;
+
         int refreshRate = model.getRefreshRate();
 
         executor.scheduleAtFixedRate(() -> {
@@ -221,6 +228,10 @@ public class GameController {
                         SoundLoader.stopClip(backgroundClip);
                         backgroundClip = null;
                     }
+                    if (!executor.isShutdown()) {
+                        executor.shutdownNow();
+                        executorStarted = false;
+                    }
                     view.setMainPanel("Menu");
                     model.renewGame();
                     model.setScore(0);
@@ -305,6 +316,10 @@ public class GameController {
                             SoundLoader.stopClip(backgroundClip);
                             backgroundClip = null;
                         }
+                        if (!executor.isShutdown()) {
+                            executor.shutdownNow();
+                            executorStarted = false;
+                        }
                         model.setLevelCompleted(false);
                         model.renewGame();
                         model.setScore(0);
@@ -351,6 +366,10 @@ public class GameController {
             if (backgroundClip != null) {
                 SoundLoader.stopClip(backgroundClip);
                 backgroundClip = null;
+            }
+            if (!executor.isShutdown()) {
+                executor.shutdownNow();
+                executorStarted = false;
             }
             model.renewGame();
             model.setScore(0);
