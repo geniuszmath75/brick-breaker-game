@@ -23,7 +23,7 @@ public class LevelSelectPanel extends JPanel {
         JLabel levelLabel = new JLabel("Level", SwingConstants.CENTER);
         levelLabel.setFont(titleFont);
 
-        // Initialize button
+        // Initialize buttons
         level1Button = new JButton("1");
         level1Button.setActionCommand("1");
         level2Button = new JButton("2");
@@ -33,23 +33,23 @@ public class LevelSelectPanel extends JPanel {
 
         backButton = new JButton("Back");
 
-        // Panel for buttons
+        // Panel for level buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(level1Button);
         buttonPanel.add(level2Button);
         buttonPanel.add(level3Button);
 
-        // Panel for "return" button
+        // Panel for back button
         JPanel backPanel = new JPanel();
         backPanel.add(backButton);
 
         // Add components to panel
-        add(levelLabel, BorderLayout.NORTH);
-        add(buttonPanel, BorderLayout.CENTER);
-        add(backPanel, BorderLayout.SOUTH);
+        add(levelLabel, BorderLayout.NORTH);    // Title at the top
+        add(buttonPanel, BorderLayout.CENTER);  // Level buttons in the center
+        add(backPanel, BorderLayout.SOUTH);     // Back button at the bottom
     }
 
-    // Add a listener for the level name button
+    // Add a listener to all level buttons
     public void addLevelListener(ActionListener listener) {
         ActionListener wrapper = e -> {
             SoundLoader.playWAV("/sounds/crash.wav");
@@ -62,7 +62,12 @@ public class LevelSelectPanel extends JPanel {
 
     // Add a listener for the BACK button
     public void addBackListener(ActionListener listener) {
-        backButton.addActionListener(e -> {
+        addButtonListener(backButton, listener);
+    }
+
+    // Adds a listener to a button with sound effect
+    private void addButtonListener(JButton button, ActionListener listener) {
+        button.addActionListener(e -> {
             SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         });

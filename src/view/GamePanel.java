@@ -13,51 +13,53 @@ public class GamePanel extends JPanel {
     private final GameModel model; // Model reference
     private final int startLives; // Initial number of lives
 
+    // Heart drawing constants
+    private static final int HEART_SIZE = 30;
+    private static final int HEART_Y_OFFSET = 13;
+    private static final int HEART_SPACING = 40;
+
     // GamePanel constructor
     public GamePanel(GameModel model) {
         this.model = model;
         this.startLives = model.getLives();
-        setBackground(Color.BLACK); // set black background color
+        setBackground(Color.BLACK); // Set black background color
     }
 
-    // Draw heart shape
+    // Draw a heart shape (used for representing lives)
     private void drawHeart(Graphics2D g2d, int x) {
-        int[] triangleX = {x + 30 / 2, x, x + 30};
-        int[] triangleY = {42, 12 + 30 / 3, 12 + 30 / 3};
+        int[] triangleX = {x + HEART_SIZE / 2, x, x + HEART_SIZE};
+        int[] triangleY = {42, 12 + HEART_SIZE / 3, 12 + HEART_SIZE / 3};
 
-        g2d.fillOval(x, 13, 30 / 2, 30 / 2); // left half of heart
-        g2d.fillOval(x + 30 / 2, 13, 30 / 2, 30 / 2); // right half of heart
-        g2d.fillPolygon(triangleX, triangleY, 3); // triangle down part of heart
+        g2d.fillOval(x, HEART_Y_OFFSET, HEART_SIZE / 2, HEART_SIZE / 2);                        // Left half of heart
+        g2d.fillOval(x + HEART_SIZE / 2, HEART_Y_OFFSET, HEART_SIZE / 2, HEART_SIZE / 2);    // Right half of heart
+        g2d.fillPolygon(triangleX, triangleY, 3); // Bottom triangle of heart
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+
+        // Enable antialiasing for smother rendering
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Get Paddle model
+        // Retrieve game elements
         Paddle paddle = model.getPaddle();
-
-        // Get Ball model
         Ball ball = model.getBall();
+        List<Brick> bricks = List.copyOf(model.getBricks());
 
-        // We take the original list and make a copy of it
-        List<Brick> bricks = model.getBricks();
-        List<Brick> bricksCopy = new java.util.ArrayList<>(bricks);
-
-        // Drawing paddle
+        // Draw paddle
         paddle.paint(g2d);
 
-        // Drawing ball
+        // Draw ball
         ball.paint(g2d);
 
-        // Drawing bricks
-        for (Brick b : bricksCopy) {
+        // Draw bricks
+        for (Brick b : bricks) {
             if (!b.isDestroyed()) { b.paint(g2d); }
         }
 
-        // Drawing start information text
+        // Drawing game start information
         if (ball.isStuck() && model.isGameRunning()) {
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 30));
@@ -65,14 +67,10 @@ public class GamePanel extends JPanel {
             g2d.drawString("USE ARROW KEYS TO MOVE", 175, 550);
         }
 
-        // Drawing lives
+        // Drawing lives (hearts)
         for (int i = 0; i < startLives; i++) {
-            if (i < model.getLives()) { // red hearts for remaining lives
-                g2d.setColor(Color.RED);
-            } else {
-                g2d.setColor(Color.GRAY); // gray hearts for lost lives
-            }
-            drawHeart(g2d, 12 + (i * 40));
+            g2d.setColor(i < model.getLives() ? Color.RED : Color.GRAY); // Red = remaining, gray = lost
+            drawHeart(g2d, 12 + (i * HEART_SPACING));
         }
 
         // Drawing score

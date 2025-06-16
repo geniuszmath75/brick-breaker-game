@@ -52,39 +52,37 @@ public class GameController {
         return executorStarted && executor != null && !executor.isShutdown();
     }
 
-    // Starting executor logic
+    // Starting game logic and executor
     // No busy-waiting warnings but remaining performance and smoothing while models moving
-    // Added also Paddle movement to simplify handling model movement
     private void startExecutor() {
         if (!isExecutorRunning()) {
             executor = Executors.newSingleThreadScheduledExecutor();
-        }
+            executorStarted = true;
 
-        executorStarted = true;
+            int refreshRate = model.getRefreshRate();
 
-        int refreshRate = model.getRefreshRate();
+            executor.scheduleAtFixedRate(() -> {
+                try {
+                    if (!model.gamePaused() && model.isGameRunning()) {
+                        model.getPaddle().move(); // Move the paddle if the game is not paused
+                        model.getBall().move(); // Move the ball if the game is not paused
+                        model.getBall().checkCollision(); // Check ball collision if game is not paused
 
-        executor.scheduleAtFixedRate(() -> {
-            try {
-                if (!model.gamePaused() && model.isGameRunning()) {
-                    model.getPaddle().move(); // Move the paddle if the game is not paused
-                    model.getBall().move(); // Move the ball if the game is not paused
-                    model.getBall().checkCollision(); // Check ball collision if game is not paused
+                        if (model.isLevelCompleted()) {
+                            model.setGamePaused(true);
+                            handleLevelCompletion();
+                        }
 
-                    if (model.isLevelCompleted()) {
-                        model.setGamePaused(true);
-                        handleLevelCompletion();
+                        if (!model.isGameRunning()) {
+                            SwingUtilities.invokeLater(this::showGameOverDialog);
+                        }
                     }
-
-                    if (!model.isGameRunning()) {
-                        SwingUtilities.invokeLater(this::showGameOverDialog);
-                    }
+                    view.repaint();
+                } catch (Exception e) {
+                    System.err.println("Error: " + e);
                 }
-                view.repaint();
-            } catch (Exception e) {
-                System.err.println("Error: " + e);
-            }
-        }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
+            }, 0, 1000L / refreshRate, TimeUnit.MILLISECONDS);
+        }
     }
 
     // Handles the START button click
@@ -122,7 +120,9 @@ public class GameController {
     // Handles the EXIT button click
     class ExitListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            executor.shutdown();
+            if(isExecutorRunning()) {
+                executor.shutdown();
+            }
             System.exit(0);
         }
     }
@@ -160,29 +160,31 @@ public class GameController {
                 int chosenLevel = Integer.parseInt(cmd);
 
                 if (model.canSelectLevel(chosenLevel)) {
-                    model.setLEVEL(chosenLevel);
-                    model.setGamePaused(false);
-                    model.startGame();
-                    startExecutor();
-                    if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
-                    view.setMainPanel("Game");
+                    startLevel(chosenLevel);
                 } else {
-                    JOptionPane.showMessageDialog(null,
-                            "You have to pass level " + (chosenLevel - 1) + " first :)",
-                            "Level still locked",
-                            JOptionPane.WARNING_MESSAGE);
-                    SoundLoader.playWAV("/sounds/crash.wav");
+                    showLockedLevelDialog(chosenLevel);
                 }
 
             } catch (NumberFormatException ex) {
-                // fallback — if something goes wrong, start from level 1
-                model.setLEVEL(1);
-                model.setGamePaused(false);
-                model.startGame();
-                startExecutor();
-                if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
-                view.setMainPanel("Game");
+                startLevel(1); // fallback if parsing fails
             }
+        }
+
+        private void startLevel(int level) {
+            model.setLEVEL(level);
+            model.setGamePaused(false);
+            model.startGame();
+            startExecutor();
+            if (backgroundClip == null) { backgroundClip = SoundLoader.loadLoopClip("/sounds/background.wav"); }
+            view.setMainPanel("Game");
+        }
+
+        private void showLockedLevelDialog(int chosenLevel) {
+            JOptionPane.showMessageDialog(null,
+                    "You have to pass level " + (chosenLevel - 1) + " first :)",
+                    "Level still locked",
+                    JOptionPane.WARNING_MESSAGE);
+            SoundLoader.playWAV("/sounds/crash.wav");
         }
     }
 
@@ -196,69 +198,70 @@ public class GameController {
         public void actionPerformed(ActionEvent e) {
             SoundLoader.playWAV("/sounds/crash.wav");
             view.setMainPanel(panelName);
-        } // Returns to menu panel
+        } // Returns to the selected panel
      }
 
-    // Handles keyboard events
+    // Handles keyboard input during the game
     private class KeyHandler extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // If Esc - pause the game
-                SoundLoader.pauseClip(backgroundClip);
-                model.setGamePaused(true); // stop the game loop flag
-                model.getPaddle().stopMoving(); // stop the paddle
+            int key = e.getKeyCode();
 
-                // Show the pause dialog
-                int option = JOptionPane.showOptionDialog(
-                        view.getGamePanel(),
-                        "Do you want to continue or go back to the menu?",
-                        "PAUSE",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        new String[]{"CONTINUE", "MENU"},
-                        "CONTINUE"
-                );
-
-                SoundLoader.playWAV("/sounds/crash.wav");
-
-                // If user chooses to go back to the menu
-                if (option == JOptionPane.NO_OPTION) {
-                    if (backgroundClip != null) {
-                        SoundLoader.stopClip(backgroundClip);
-                        backgroundClip = null;
-                    }
-                    if (!executor.isShutdown()) {
-                        executor.shutdownNow();
-                        executorStarted = false;
-                    }
-                    view.setMainPanel("Menu");
-                    model.renewGame();
-                    model.setScore(0);
-                    model.setLives(3);
-                } else {
-                    // User selected "CONTINUE" → resume music exactly from where we stopped it
-                    model.setGamePaused(false);
-                    if (backgroundClip != null) {
-                        SoundLoader.resumeClip(backgroundClip);
-                    }
-                }
-            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) { // If Space - pass the event to the Ball model
-                model.getBall().keyPressed(e);
-            } else { // Else pass the event to the Paddle model
-                model.getPaddle().setMoving(e.getKeyCode(), true);
+            if (key == KeyEvent.VK_ESCAPE) {
+                // If Esc - pause the game
+                handlePause();
+            } else if (key == KeyEvent.VK_SPACE) {
+                model.getBall().keyPressed(e); // Pass space to Ball
+            } else {
+                model.getPaddle().setMoving(key, true); // Pass arrow keys to Paddle
             }
         }
 
         @Override
         public void keyReleased(KeyEvent e) { model.getPaddle().setMoving(e.getKeyCode(), false); } // Pass the event to the Paddle model
+
+        private void handlePause() {
+            SoundLoader.pauseClip(backgroundClip);
+            model.setGamePaused(true); // Stop the game loop flag
+            model.getPaddle().stopMoving(); // Stop the paddle
+
+            // Show the pause dialog
+            int option = JOptionPane.showOptionDialog(
+                    view.getGamePanel(),
+                    "Do you want to continue or go back to the menu?",
+                    "PAUSE",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    new String[]{"CONTINUE", "MENU"},
+                    "CONTINUE"
+            );
+
+            SoundLoader.playWAV("/sounds/crash.wav");
+
+            // If user chooses to go back to the menu
+            if (option == JOptionPane.NO_OPTION) {
+                stopBackgroundMusic();
+                if (isExecutorRunning()) {
+                    executor.shutdownNow();
+                    executorStarted = false;
+                }
+                view.setMainPanel("Menu");
+                model.setLives(3);
+            } else {
+                // User selected "CONTINUE" → resume music exactly from where we stopped it
+                model.setGamePaused(false);
+                resumeBackgroundMusic();
+            }
+        }
     }
 
     // Handles the level completion logic
     private void handleLevelCompletion() {
         SwingUtilities.invokeLater(() -> {
             int currentLevel = model.getLEVEL();
-            // If level 3, endless mode: only reset the blocks and continue
+
+            // If level 3, activate endless mode and reset only the bricks
             if (currentLevel == 3) {
                 if (!model.isEndlessModeActivated()) {
                     SoundLoader.pauseClip(backgroundClip);
@@ -269,14 +272,13 @@ public class GameController {
                             JOptionPane.INFORMATION_MESSAGE
                     );
                     SoundLoader.playWAV("/sounds/crash.wav");
-                    if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
+                    resumeBackgroundMusic();
                     model.setEndlessModeActivated(true);
                 }
                 model.resetBricksOnly();
                 model.setGamePaused(false);
-            }
-            // Level 1 or 2 – ask what's next
-            else {
+            } else {
+                // Level 1 or 2 completed – prompt user for next action
                 SoundLoader.pauseClip(backgroundClip);
                 int choice = JOptionPane.showOptionDialog(
                         view.getGamePanel(),
@@ -292,50 +294,20 @@ public class GameController {
                 SoundLoader.playWAV("/sounds/crash.wav");
 
                 switch (choice) {
-                    case 0 -> { // Replay Level
-                        model.setLevelCompleted(false);
-                        model.setLives(3);
-                        model.renewGame();
-                        model.startGame();
-                        model.setGamePaused(false);
-                        view.setMainPanel("Game");
-                        if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
-                    }
-                    case 1 -> { // Go to the next level
-                        model.setLevelCompleted(false);
-                        model.setLEVEL(currentLevel + 1);
-                        model.setLives(3);
-                        model.renewGame();
-                        model.startGame();
-                        model.setGamePaused(false);
-                        view.setMainPanel("Game");
-                        if (backgroundClip != null) SoundLoader.resumeClip(backgroundClip);
-                    }
-                    default -> { // Back to menu
-                        if (backgroundClip != null) {
-                            SoundLoader.stopClip(backgroundClip);
-                            backgroundClip = null;
-                        }
-                        if (!executor.isShutdown()) {
-                            executor.shutdownNow();
-                            executorStarted = false;
-                        }
-                        model.setLevelCompleted(false);
-                        model.renewGame();
-                        model.setScore(0);
-                        model.setLives(3);
-                        view.setMainPanel("Menu");
-                    }
+                    case 0 -> restartLevel(currentLevel);       // Replay current level
+                    case 1 -> restartLevel(currentLevel + 1);   // Go to next level
+                    default -> goToMenu();                      // Return to menu
                 }
             }
         });
     }
 
+    // Displays the Game Over dialog and handles user decision
     private void showGameOverDialog() {
-        // Gdy już weszliśmy tu, model.isGameRunning()==false, więc pauzujemy dźwięk:
+        // Pause background music (isGameRunning = false)
         SoundLoader.pauseClip(backgroundClip);
 
-        // Ustawiamy flagę, żeby dialog się nie powtarzał wielokrotnie w jednej rundzie:
+        // Set a flag so that the dialogue does not repeat itself multiple times in one round
         model.setGamePaused(true);
 
         int option = JOptionPane.showOptionDialog(
@@ -351,30 +323,42 @@ public class GameController {
         SoundLoader.playWAV("/sounds/crash.wav");
 
         if (option == JOptionPane.YES_OPTION) {
-            // Wznów od nowa (restart tego samego poziomu)
-            model.renewGame();
-            model.setScore(0);
-            model.setLives(3);
-            model.setGamePaused(false);
-            // Wznowienie muzyki od ostatniej pozycji:
-            if (backgroundClip != null) {
-                SoundLoader.resumeClip(backgroundClip);
-            }
-            view.setMainPanel("Game");
+            // Restart the same level
+            restartLevel(model.getLEVEL());
         } else {
-            // Powrót do menu – zamykamy klip na dobre:
-            if (backgroundClip != null) {
-                SoundLoader.stopClip(backgroundClip);
-                backgroundClip = null;
-            }
-            if (!executor.isShutdown()) {
-                executor.shutdownNow();
-                executorStarted = false;
-            }
-            model.renewGame();
-            model.setScore(0);
-            model.setLives(3);
-            view.setMainPanel("Menu");
+            goToMenu();
+        }
+    }
+
+    private void restartLevel(int level) {
+        model.setLEVEL(level);
+        model.renewGame();
+        model.setGamePaused(false);
+        resumeBackgroundMusic();
+        view.setMainPanel("Game");
+    }
+
+    private void goToMenu() {
+        stopBackgroundMusic();
+        if (isExecutorRunning()) {
+            executor.shutdownNow();
+            executorStarted = false;
+        }
+        model.setLevelCompleted(false);
+        model.setLives(3);
+        view.setMainPanel("Menu");
+    }
+
+    private void resumeBackgroundMusic() {
+        if(backgroundClip != null) {
+            SoundLoader.resumeClip(backgroundClip);
+        }
+    }
+
+    private void stopBackgroundMusic() {
+        if(backgroundClip != null) {
+            SoundLoader.stopClip(backgroundClip);
+            backgroundClip = null;
         }
     }
 }

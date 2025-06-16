@@ -9,9 +9,9 @@ public class MapGenerator {
 
     private final GameModel model;
 
-    private Ball ball; // store Ball data
-    private Paddle paddle; // store Paddle data
-    private final List<Brick> bricks; // store list of Brick objects data
+    private Ball ball; // Ball instance
+    private Paddle paddle; // Paddle instance
+    private final List<Brick> bricks; // List of bricks
 
     public MapGenerator(int level, String difficulty, GameModel gameModel) {
         this.model = gameModel;
@@ -38,13 +38,13 @@ public class MapGenerator {
         // Check if Paddle is initialized before Ball
         if(paddle == null) { throw new IllegalStateException("Paddle must be initialized before Ball"); }
 
-        int speed = 0; // Ball base speed
+        int baseSpeed = 0;
+        int diameter = 25;
 
         // Initialize Ball object
-        int diameter = 25;
         double centeredX = paddle.getX() + (paddle.getWidth() / 2.0) - (diameter / 2.0);
         double centeredY = paddle.getY() - diameter; // correct initial generation of position
-        ball = new Ball(centeredX, centeredY, diameter, model.setSpeed(speed), model, paddle, bricks);
+        ball = new Ball(centeredX, centeredY, diameter, model.setSpeed(baseSpeed), model, paddle, bricks);
     }
 
     // Generate Paddle element on map
@@ -54,29 +54,26 @@ public class MapGenerator {
 
         // Set paddle base speed and width based on DIFFICULTY
         switch (DIFFICULTY) {
-            case "medium": {
+            case "medium":
                 speed = 1;
                 width = 140;
                 break;
-            }
-            case "hard": {
+            case "hard":
                 speed = 0;
                 width = 120;
                 break;
-            }
-            // EASY mode
-            default: {
+            default: // EASY
                 speed = 2;
                 width = 160;
-            }
         }
 
         // Initialize Paddle object
         paddle = new Paddle(320, 715, width, 15, model.setSpeed(speed));
     }
 
+    // Generate brick pattern for given level and difficulty
     private void generateBricks() {
-        int offsetY = 50; // Distance from the window top border
+        int offsetY = 50; // Distance from top of window
         int padding = 5; // Space between bricks
 
         int brickWidth = (model.getGameWindowWidth() - 2 * padding) / 10 - padding; // GAME_WINDOW_WIDTH = 800 -> brickWidth = 74
@@ -86,13 +83,11 @@ public class MapGenerator {
         int baseDestruction = switch (DIFFICULTY) {
             case "medium" -> 2;
             case "hard" -> 3;
-            default -> 1; // for easy difficulty
+            default -> 1; // EASY
         };
 
-        BrickLayout layout = getLayoutForLevel(LEVEL, DIFFICULTY);
-
         // Get 2D array of brick pattern
-        int[][] pattern = layout.getLayout();
+        int[][] pattern = getLayoutForLevel(LEVEL, DIFFICULTY).getLayout();
 
         for(int row = 0; row < pattern.length; row++) {
             for(int col = 0; col < pattern[row].length; col++) {
@@ -106,7 +101,7 @@ public class MapGenerator {
         }
     }
 
-    // Get brick layout based on level and difficulty
+    // Return brick layout based on level and difficulty
     private BrickLayout getLayoutForLevel(int level, String difficulty) {
         return switch (level) {
             case 1 -> switch (difficulty) {

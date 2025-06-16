@@ -41,23 +41,22 @@ public class MenuPanel extends JPanel {
 
     // Adds a listener for the START button
     public void addStartListener(ActionListener listener) {
-        startButton.addActionListener(e -> {
-            SoundLoader.playWAV("/sounds/crash.wav");
-            listener.actionPerformed(e);
-        });
+        addButtonListener(startButton, listener);
     }
 
     // Adds a listener for the STATS button
     public void addStatsListener(ActionListener listener) {
-        statsButton.addActionListener(e -> {
-            SoundLoader.playWAV("/sounds/crash.wav");
-            listener.actionPerformed(e);
-        });
+        addButtonListener(statsButton, listener);
     }
 
     // Adds a listener for the EXIT button
     public void addExitListener(ActionListener listener) {
-        exitButton.addActionListener(e -> {
+        addButtonListener(exitButton, listener);
+    }
+
+    // Adds a listener to a button with sound effect
+    private void addButtonListener(JButton button, ActionListener listener) {
+        button.addActionListener(e -> {
             SoundLoader.playWAV("/sounds/crash.wav");
             listener.actionPerformed(e);
         });

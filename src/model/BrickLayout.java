@@ -1,5 +1,11 @@
 package model;
 
+/**
+ * Enum containing predefined brick layouts for each level and difficulty.
+ * Each layout is represented by a 10x10 integer matrix, where:
+ * 1 - brick is present,
+ * 0 - empty space.
+ */
 public enum BrickLayout {
     LEVEL_1_EASY(new int[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -114,5 +120,8 @@ public enum BrickLayout {
 
     BrickLayout(int[][] layout) { this.layout = layout; }
 
+    /**
+     * Returns a 2D array representing the brick layout for this level/difficulty.
+     */
     public int[][] getLayout() { return layout; }
 }

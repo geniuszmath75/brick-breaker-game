@@ -35,16 +35,17 @@ public class Brick {
     public int getBrickWidth() { return brickWidth; }
     public int getBrickHeight() { return brickHeight; }
 
-    // Decrease destructionLevel on each hit
+    // Decrease destructionLevel by 1 in hit
     public void hit() { destructionLevel--; }
 
+    // Returns true if the brick has no hits remaining
     public boolean isDestroyed() { return destructionLevel <= 0; }
 
     /**
      * Paints the brick with a dynamic overlay:
-     *  - initially (destructionLevel == initialDestruction) – no overlay
-     *  - as destructionLevel decreases, a semi-transparent white overlay is drawn,
-     *    with alpha increasing linearly up to 1.0 (when nearly destroyed)
+     *  - when fully intact (destructionLevel == initialDestruction): no overlay
+     *  - when partially damaged: darker overlay appears with increasing opacity
+     *  - when nearly destroyed: two white cross-lines are drawn
      */
     public void paint(Graphics2D g2d) {
         // Fill the brick background
@@ -56,14 +57,13 @@ public class Brick {
         g2d.setColor(Color.WHITE);
         g2d.drawRoundRect((int) x, (int) y, brickWidth, brickHeight, 25, 25);
 
-        // If brick is damaged but not destroyed, draw white overlay
+        // If brick is damaged but not destroyed, draw black overlay
         if (destructionLevel < initialDestruction && destructionLevel > 0) {
             // Calculate alpha from 0.3 (light) to 1.0 (fully overlaid)
             float ratio = (initialDestruction - destructionLevel) / (float) initialDestruction;
             float alpha = 0.3f + 0.7f * ratio;
-            if (alpha > 1f) alpha = 1f;
 
-            // Set compositing and draw semi-transparent white overlay over the brick
+            // Apply transparency and draw overlay
             Composite oldComp = g2d.getComposite();
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
             g2d.setColor(Color.BLACK);
@@ -71,23 +71,22 @@ public class Brick {
             g2d.setComposite(oldComp);
         }
 
-        // Draw destruction lines based on destructionLevel
-        g2d.setColor(Color.WHITE);
-        g2d.setStroke(new BasicStroke(2));
+        // Draw white diagonal lines if partially or critically damaged
+        if(destructionLevel <= 2 && destructionLevel > 0) {
+            g2d.setColor(Color.WHITE);
+            g2d.setStroke(new BasicStroke(2));
 
-        int margin = 5;
-        int x1 = (int) x + margin;
-        int y1 = (int) y + margin;
-        int x2 = (int) x + brickWidth - margin;
-        int y2 = (int) y + brickHeight - margin;
+            int margin = 5;
+            int x1 = (int) x + margin;
+            int y1 = (int) y + margin;
+            int x2 = (int) x + brickWidth - margin;
+            int y2 = (int) y + brickHeight - margin;
 
-        switch (destructionLevel) {
-            case 2 -> g2d.drawLine(x1, y1, x2, y2);
-            case 1 -> {
-                g2d.drawLine(x1, y1, x2, y2);
-                g2d.drawLine(x2, y1, x1, y2);
+            g2d.drawLine(x1, y1, x2, y2); // First diagonal
+
+            if(destructionLevel == 1) {
+                g2d.drawLine(x2, y1, x1, y2); // Second diagonal when almost destroyed
             }
-            default -> {}
         }
     }
 }
