@@ -331,6 +331,10 @@ public class GameController {
     }
 
     private void restartLevel(int level) {
+        // Restart lives when go to next level
+        if(model.getLEVEL() != level) {
+            model.setLives(3);
+        }
         model.setLEVEL(level);
         model.renewGame();
         model.setGamePaused(false);
